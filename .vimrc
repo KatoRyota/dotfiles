@@ -13,7 +13,7 @@
     set fileformats=unix,dos,mac
     " このファイル(vim script)のエンコード。
     scriptencoding utf-8
-    au!
+    autocmd!
 " }
 " 基本設定 {
     " 未整理 {
@@ -173,7 +173,7 @@
         nnoremap <C-]> g<C-]>
     " }
     " 閉じ括弧 {
-        function! s:key_mapping_parentheses(mode)
+        function! s:insert_parentheses(mode)
             if a:mode == 1
                 inoremap {} {}<Left>
                 inoremap [] []<Left>
@@ -191,14 +191,41 @@
             endif
         endfunction
 
-        call s:key_mapping_parentheses(2)
+        call s:insert_parentheses(0)
     " }}
-    " ファイルタイプ 判定 {
-        au BufRead,BufNewFile *.py setfiletype python
-        au BufRead,BufNewFile *.tpl setfiletype smarty
-        au BufRead,BufNewFile *.html setfiletype html
-        au BufRead,BufNewFile *.vimrc setfiletype vim
+    " undo履歴クリア関数 {
+        function! s:clear_undo() abort
+            let old_undolevels = &undolevels
+            setlocal undolevels=-1
+            execute "normal! a \<BS>\<Esc>"
+            let &l:undolevels = old_undolevels
+        endfunction
+
+        command! -bar ClearUndo  call s:clear_undo()
     " }
+    " ファイルタイプ 判定 {
+        autocmd BufRead,BufNewFile *.py setfiletype python
+        autocmd BufRead,BufNewFile *.tpl setfiletype smarty
+        autocmd BufRead,BufNewFile *.html setfiletype html
+        autocmd BufRead,BufNewFile *.jsp setfiletype jsp
+        autocmd BufRead,BufNewFile *.inc setfiletype jsp
+        autocmd BufRead,BufNewFile *.vimrc setfiletype vim
+    " }
+    " 対応する括弧 for matchit.zip {{{
+        function! s:set_match_words()
+            let b:match_words = "\<if\>:\<else\>,\<head.*:\</head\>,\<body.*:\</body\>," .
+                                \ "\<title.*:\</title\>,\<html.*:\</html\>,\<form.*:\</form\>," .
+                                \ "\<table.*:\</table\>,\<thead.*:\</thead\>," .
+                                \ "\<tbody.*:\</tbody\>,\<tr.*:\</tr\>,\<td.*:\</td\>," .
+                                \ "\<div.*:\</div\>,\<label.*:\</label\>," .
+                                \ "\<style.*:\</style\>,\<nav.*:\</nav\>,\<li.*:\</li\>," .
+                                \ "\<ol.*:\</ol\>,\<select.*:\</select\>," .
+                                \ "\<script.*:\</script\>,\<a.*:\</a\>," .
+                                \ &matchpairs . ","
+        endfunction
+
+        autocmd BufWinEnter * call s:set_match_words()
+    " }}}
     " ウィンドウ {
         nnoremap ,wh :resize +4<CR>
         nnoremap ,ww :vertical resize +4<CR>
@@ -322,7 +349,7 @@
             let g:unite_source_file_mru_limit = 300
             let g:unite_source_directory_mru_long_limit = 6000
             " let g:unite_prompt = '❯ '
-            call s:configure_unite_grep('ag')
+            call s:configure_unite_grep('grep')
         endfunction
 
         function! s:configure_unite_grep(grep)
@@ -557,12 +584,12 @@
         "   endfunction"}}}
 
         " Enable omni completion.
-        au FileType css setlocal omnifunc=csscomplete#CompleteCSS
-        au FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-        au FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-        au FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+        autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+        autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+        autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+        autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
         " jedi-vimを使うのでoff
-        " au FileType python setlocal omnifunc=pythoncomplete#Complete
+        " autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 
         call neobundle#untap()
     endif
@@ -665,21 +692,11 @@
     if neobundle#tap('matchit.zip')
         call neobundle#config({
             \       'autoload' : {
-            \           'insert' : 1,
+            \           'filetypes' : ['jsp', 'tpl', 'html', 'xml'],
             \       }
             \   })
 
         function! neobundle#tapped.hooks.on_source(bundle)
-            let b:match_words = s:get_match_words()
-        endfunction
-
-        function! s:get_match_words()
-            return
-                \ "\<if\>:\<else\>,<head.*:</head>,<body.*:</body>,<li.*:</li>,"
-                \ . "<title.*:</title>,<html.*:</html>,<form.*:</form>,<a.*:</a>,"
-                \ . "<table.*:</table>,<div.*:</div>,<label.*:</label>,"
-                \ . "<style.*:</style>,<nav.*:</nav>,/*:*/,```:```"
-                \ . "<script.*:</script>"
         endfunction
 
         call neobundle#untap()
@@ -811,8 +828,8 @@
             let g:neocomplete#force_omni_input_patterns.python = '\h\w*\|[^. \t]\.\w*'
         endfunction
 
-        au FileType python setlocal omnifunc=jedi#completions
-        au FileType python setlocal completeopt-=preview
+        autocmd FileType python setlocal omnifunc=jedi#completions
+        autocmd FileType python setlocal completeopt-=preview
 
         call neobundle#untap()
     endif
