@@ -139,7 +139,8 @@
         " :grep(外部grep)の設定
         set grepprg=grep\ -anHP\ --color=always\ --exclude\ *.class
         " 内部grepの検索対象から除外
-        set wildignore=*.jpg,*.gif,*.png,*.tif,*.class,*.jar,*.war,*.ear,*.zip,*.apk,.git/**
+        set wildignore="*.jpg,*.gif,*.png,*.tif,*.o,*.obj,*.pyc,*.so,*.dll,*.class,*.jar,*.war," .
+                       \ "*.ear,*.zip,*.apk,.git/**"
     " }
     " 折り畳み {
         " 折りたたみ方式
@@ -204,12 +205,14 @@
         command! -bar ClearUndo  call s:clear_undo()
     " }
     " ファイルタイプ 判定 {
-        autocmd BufRead,BufNewFile *.py setfiletype python
-        autocmd BufRead,BufNewFile *.tpl setfiletype smarty
-        autocmd BufRead,BufNewFile *.html setfiletype html
-        autocmd BufRead,BufNewFile *.jsp setfiletype jsp
-        autocmd BufRead,BufNewFile *.inc setfiletype jsp
-        autocmd BufRead,BufNewFile *.vimrc setfiletype vim
+        autocmd BufRead,BufNewFile,SessionLoadPost *.py setfiletype python
+        autocmd BufRead,BufNewFile,SessionLoadPost *.php setfiletype php
+        autocmd BufRead,BufNewFile,SessionLoadPost *.tpl setfiletype smarty
+        autocmd BufRead,BufNewFile,SessionLoadPost *.phtml setfiletype smarty
+        autocmd BufRead,BufNewFile,SessionLoadPost *.html setfiletype html
+        autocmd BufRead,BufNewFile,SessionLoadPost *.jsp setfiletype jsp
+        autocmd BufRead,BufNewFile,SessionLoadPost *.inc setfiletype jsp
+        autocmd BufRead,BufNewFile,SessionLoadPost *.vimrc setfiletype vim
     " }
     " 対応する括弧 for matchit.zip {{{
         function! s:set_match_words()
@@ -224,7 +227,7 @@
                                 \ &matchpairs . ","
         endfunction
 
-        autocmd BufWinEnter * call s:set_match_words()
+        autocmd BufWinEnter,SessionLoadPost * call s:set_match_words()
     " }}}
     " ウィンドウ {
         nnoremap ,wh :resize +4<CR>
@@ -588,8 +591,8 @@
         autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
         autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
         autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-        " jedi-vimを使うのでoff
-        " autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+        " jedi-vimを使う場合はoff
+        autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 
         call neobundle#untap()
     endif
@@ -692,7 +695,7 @@
     if neobundle#tap('matchit.zip')
         call neobundle#config({
             \       'autoload' : {
-            \           'filetypes' : ['jsp', 'tpl', 'html', 'xml'],
+            \           'filetypes' : ['jsp', 'smarty', 'html', 'xml'],
             \       }
             \   })
 
@@ -826,10 +829,11 @@
             endif
 
             let g:neocomplete#force_omni_input_patterns.python = '\h\w*\|[^. \t]\.\w*'
+
+            autocmd FileType python setlocal omnifunc=jedi#completions
+            autocmd FileType python setlocal completeopt-=preview
         endfunction
 
-        autocmd FileType python setlocal omnifunc=jedi#completions
-        autocmd FileType python setlocal completeopt-=preview
 
         call neobundle#untap()
     endif
