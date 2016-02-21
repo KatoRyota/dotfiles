@@ -139,8 +139,14 @@
         " :grep(外部grep)の設定
         set grepprg=grep\ -anHP\ --color=always\ --exclude\ *.class
         " 内部grepの検索対象から除外
-        set wildignore="*.jpg,*.gif,*.png,*.tif,*.o,*.obj,*.pyc,*.so,*.dll,*.class,*.jar,*.war," .
-                       \ "*.ear,*.zip,*.apk,.git/**"
+        set wildignore=*.jpg,*.gif,*.png,*.tif,
+                      \*.o,*.obj,*.pyc,*.so,*.class,
+                      \*.jar,*.war,*.ear,
+                      \*.dll,*.apk,
+                      \*.zip,*.rar,
+                      \*/.git/*,
+                      \*/python2.6/*,
+                      \*/p_auth-api/bin/*,
     " }
     " 折り畳み {
         " 折りたたみ方式
@@ -210,8 +216,10 @@
         autocmd BufRead,BufNewFile,SessionLoadPost *.tpl setfiletype smarty
         autocmd BufRead,BufNewFile,SessionLoadPost *.phtml setfiletype smarty
         autocmd BufRead,BufNewFile,SessionLoadPost *.html setfiletype html
+        autocmd BufRead,BufNewFile,SessionLoadPost *.java setfiletype java
         autocmd BufRead,BufNewFile,SessionLoadPost *.jsp setfiletype jsp
         autocmd BufRead,BufNewFile,SessionLoadPost *.inc setfiletype jsp
+        autocmd BufRead,BufNewFile,SessionLoadPost *.md setfiletype markdown
         autocmd BufRead,BufNewFile,SessionLoadPost *.vimrc setfiletype vim
     " }
     " 対応する括弧 for matchit.zip {{{
@@ -265,8 +273,8 @@
     " }
     " 一覧 {
         NeoBundle 'nanotech/jellybeans.vim'
+        NeoBundle 'Shougo/vimproc.vim'
 
-        NeoBundleLazy 'Shougo/vimproc.vim'
         NeoBundleLazy 'Shougo/unite.vim', {'depends' : ['Shougo/vimproc.vim']}
         NeoBundleLazy 'Shougo/vimshell.vim', {'depends' : ['Shougo/vimproc.vim']}
         NeoBundleLazy 'Shougo/neocomplete.vim', {'depends' : ['Shougo/vimproc.vim']}
@@ -551,6 +559,40 @@
             let g:neocomplete#sources#omni#input_patterns.perl =
                     \ '[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
 
+            " Plugin key-mappings.
+            inoremap <expr><C-g>     neocomplete#undo_completion()
+            inoremap <expr><C-l>     neocomplete#complete_common_string()
+
+            " Recommended key-mappings.
+            " <CR>: close popup and save indent.
+            inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
+            " <TAB>: completion.
+            inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+            " <C-h>, <BS>: close popup and delete backword char.
+            inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
+            inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
+            inoremap <expr><C-y>  neocomplete#close_popup()
+            inoremap <expr><C-e>  neocomplete#cancel_popup()
+            " Close popup by <Space>.
+            " inoremap <expr><Space> pumvisible() ? neocomplete#close_popup() : "\<Space>"
+
+            " For smart TAB completion.
+            " inoremap <expr><TAB>  pumvisible() ? "\<C-n>" :
+            "         \ <SID>check_back_space() ? "\<TAB>" :
+            "         \ neocomplete#start_manual_complete()
+            "   function! s:check_back_space() "{{{
+            "     let col = col('.') - 1
+            "     return !col || getline('.')[col - 1]  =~ '\s'
+            "   endfunction"}}}
+
+            " Enable omni completion.
+            autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+            autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+            autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+            autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+            " jedi-vimを使う場合はoff
+            autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+            autocmd FileType python setlocal completeopt-=preview
         endfunction
 
         function! s:my_cr_function()
@@ -558,41 +600,6 @@
             " For no inserting <CR> key.
             return pumvisible() ? neocomplete#close_popup() : "\<CR>"
         endfunction
-
-
-        " Plugin key-mappings.
-        inoremap <expr><C-g>     neocomplete#undo_completion()
-        inoremap <expr><C-l>     neocomplete#complete_common_string()
-
-        " Recommended key-mappings.
-        " <CR>: close popup and save indent.
-        inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
-        " <TAB>: completion.
-        inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
-        " <C-h>, <BS>: close popup and delete backword char.
-        inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
-        inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
-        inoremap <expr><C-y>  neocomplete#close_popup()
-        inoremap <expr><C-e>  neocomplete#cancel_popup()
-        " Close popup by <Space>.
-        " inoremap <expr><Space> pumvisible() ? neocomplete#close_popup() : "\<Space>"
-
-        " For smart TAB completion.
-        " inoremap <expr><TAB>  pumvisible() ? "\<C-n>" :
-        "         \ <SID>check_back_space() ? "\<TAB>" :
-        "         \ neocomplete#start_manual_complete()
-        "   function! s:check_back_space() "{{{
-        "     let col = col('.') - 1
-        "     return !col || getline('.')[col - 1]  =~ '\s'
-        "   endfunction"}}}
-
-        " Enable omni completion.
-        autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-        autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-        autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-        autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-        " jedi-vimを使う場合はoff
-        autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 
         call neobundle#untap()
     endif
@@ -618,7 +625,7 @@
             " let g:vimfiler_enable_auto_cd = 1
         endfunction
 
-        nnoremap <Leader>e :VimFilerExplorer -winwidth=34 -winminwidth=34<CR>
+        nnoremap <Leader>e :VimFiler<CR>
 
         call neobundle#untap()
     endif
@@ -754,7 +761,7 @@
             \   })
 
         function! neobundle#tapped.hooks.on_source(bundle)
-            let g:tagbar_width=30
+            let g:tagbar_width=34
         endfunction
 
         nnoremap <Leader>t :TagbarToggle<CR>
