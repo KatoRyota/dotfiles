@@ -140,13 +140,16 @@
         set grepprg=grep\ -anHP\ --color=always\ --exclude\ *.class
         " 内部grepの検索対象から除外
         set wildignore=*.jpg,*.gif,*.png,*.tif,
+                      \*.pdf,
+                      \*.doc,*.docx,*.xls,*.xlsx,*.ppt,*.pptx,
                       \*.o,*.obj,*.pyc,*.so,*.class,
                       \*.jar,*.war,*.ear,
-                      \*.dll,*.apk,
-                      \*.zip,*.rar,
+                      \*.dll,*.apk,*.asta,
+                      \*.zip,*.rar,*.gz,
                       \*/.git/*,
                       \*/python2.6/*,
                       \*/p_auth-api/bin/*,
+                      \*/perl-lib/*,
     " }
     " 折り畳み {
         " 折りたたみ方式
