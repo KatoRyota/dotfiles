@@ -1,0 +1,19 @@
+--recurse=yes
+
+--langmap=PHP:+.inc
+
+--exclude=*.min.js
+--exclude=*jquery.columnmanager.js
+
+--exclude=*/bin/*
+--exclude=*/__pycache__/*
+--exclude=*/python3.4/*
+--exclude=*/python3.4m/*
+--exclude=*.pyc
+--exclude=*.db
+
+--langdef=markdown
+--langmap=markdown:+.mkd,markdown:+.md
+--regex-markdown=/^#[ \t]+(.*)/\1/h,Heading_L1/
+--regex-markdown=/^##[ \t]+(.*)/\1/i,Heading_L2/
+--regex-markdown=/^###[ \t]+(.*)/\1/k,Heading_L3/

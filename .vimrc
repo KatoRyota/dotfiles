@@ -83,11 +83,11 @@
     " }
     " スクロール {
         " 左右スクロール時の視界を確保
-        "set sidescrolloff=16
+        set sidescrolloff=5
         " 左右スクロールは一文字づつ行う
         set sidescroll=1
-        " 上下5行の視界を確保
-        "set scrolloff=5
+        " 上下n行の視界を確保
+        set scrolloff=0
     " }
     " テキスト部分の表示 {
         " 長いテキストの折り返し
@@ -209,12 +209,14 @@
             setlocal undolevels=-1
             execute "normal! a \<BS>\<Esc>"
             let &l:undolevels = old_undolevels
+            execute "w"
         endfunction
 
-        command! -bar ClearUndo  call s:clear_undo()
+        command! -bar ClearUndo call s:clear_undo()
     " }
     " ファイルタイプ 判定 {
-        autocmd BufRead,BufNewFile,SessionLoadPost *.py setfiletype python
+        "autocmd BufRead,BufNewFile,SessionLoadPost *.py setfiletype python
+        autocmd BufReadPost,FileReadPost *.py set filetype=python
         autocmd BufRead,BufNewFile,SessionLoadPost *.php setfiletype php
         autocmd BufRead,BufNewFile,SessionLoadPost *.tpl setfiletype smarty
         autocmd BufRead,BufNewFile,SessionLoadPost *.phtml setfiletype smarty
@@ -222,7 +224,8 @@
         autocmd BufRead,BufNewFile,SessionLoadPost *.java setfiletype java
         autocmd BufRead,BufNewFile,SessionLoadPost *.jsp setfiletype jsp
         autocmd BufRead,BufNewFile,SessionLoadPost *.inc setfiletype jsp
-        autocmd BufRead,BufNewFile,SessionLoadPost *.md setfiletype markdown
+        "autocmd BufRead,BufNewFile,SessionLoadPost *.md setfiletype markdown
+        autocmd BufReadPost,FileReadPost *.md set filetype=markdown
         autocmd BufRead,BufNewFile,SessionLoadPost *.vimrc setfiletype vim
     " }
     " 対応する括弧 for matchit.zip {{{
@@ -238,7 +241,8 @@
                                 \ &matchpairs . ","
         endfunction
 
-        autocmd BufWinEnter,SessionLoadPost * call s:set_match_words()
+        "autocmd BufWinEnter,SessionLoadPost * call s:set_match_words()
+        autocmd BufReadPost,FileReadPost * call s:set_match_words()
     " }}}
     " ウィンドウ {
         nnoremap ,wh :resize +4<CR>
@@ -275,48 +279,43 @@
         NeoBundle 'Shougo/neobundle-vim-recipes', {'force' : 1}
     " }
     " 一覧 {
+        "for common
         NeoBundle 'nanotech/jellybeans.vim'
         NeoBundle 'Shougo/vimproc.vim'
-
         NeoBundleLazy 'Shougo/unite.vim', {'depends' : ['Shougo/vimproc.vim']}
-        NeoBundleLazy 'Shougo/vimshell.vim', {'depends' : ['Shougo/vimproc.vim']}
-        NeoBundleLazy 'Shougo/neocomplete.vim', {'depends' : ['Shougo/vimproc.vim']}
         NeoBundleLazy 'Shougo/neomru.vim', {'depends' : ['Shougo/unite.vim']}
         NeoBundleLazy 'Shougo/tabpagebuffer.vim', {'depends' : ['Shougo/unite.vim']}
         NeoBundleLazy 'Shougo/unite-outline', {'depends' : ['Shougo/unite.vim']}
         NeoBundleLazy 'Shougo/vimfiler.vim', {'depends' : ["Shougo/unite.vim"]}
-        NeoBundleLazy 'Shougo/neosnippet.vim', {'depends' : ['Shougo/neosnippet-snippets'] }
+        NeoBundleLazy 'Shougo/neocomplete.vim', {'depends' : ['Shougo/vimproc.vim']}
+        NeoBundleLazy 'Shougo/vimshell.vim', {'depends' : ['Shougo/vimproc.vim']}
+        NeoBundleLazy 'Shougo/neosnippet.vim', {'depends' : ['Shougo/neocomplete.vim', 'Shougo/neosnippet-snippets'] }
         NeoBundleLazy 'Shougo/neosnippet-snippets'
         NeoBundleLazy 'tsukkee/unite-tag'
         NeoBundleLazy 'majutsushi/tagbar'
+        NeoBundleFetch 'jszakmeister/markdown2ctags', {'depends' : ['majutsushi/tagbar']}
         NeoBundleLazy 'tpope/vim-surround'
-        NeoBundleLazy 'tpope/vim-endwise'
         NeoBundleLazy 'vim-scripts/matchit.zip'
+        "NeoBundleLazy 'scrooloose/syntastic'
+
+        "for markdown
+        NeoBundleLazy 'godlygeek/tabular'
+        NeoBundleLazy 'plasticboy/vim-markdown', {'depends' : ['godlygeek/tabular'] }
+
+        "for python
+        NeoBundleLazy 'davidhalter/jedi-vim'
+        NeoBundleLazy 'jmcantrell/vim-virtualenv'
+        "NeoBundleLazy 'lambdalisue/vim-django-support'
+
+        "for html
         NeoBundleLazy 'othree/html5.vim'
+        "NeoBundleLazy 'mattn/emmet-vim'
+
+        "for css
         NeoBundleLazy 'hail2u/vim-css3-syntax'
+
+        "for javascript
         NeoBundleLazy 'pangloss/vim-javascript'
-        NeoBundleLazy 'rcmdnk/vim-markdown'
-        " NeoBundleLazy 'Townk/vim-autoclose'
-        " NeoBundleLazy 'scrooloose/syntastic'
-        " NeoBundleLazy 'mattn/emmet-vim'
-        " NeoBundleLazy 'davidhalter/jedi-vim'
-        " NeoBundleLazy 'lambdalisue/vim-django-support'
-        " NeoBundleLazy 'jmcantrell/vim-virtualenv'
-        " NeoBundleLazy 'kchmck/vim-coffee-script'
-        " NeoBundle 'LeafCage/yankround.vim'
-        " NeoBundle 'AndrewRadev/switch.vim'
-        " NeoBundle 'tyru/open-browser.vim'
-        " NeoBundle 'rizzatti/dash.vim'
-        " プログラムの即時実行
-        " NeoBundleLazy 'thinca/vim-quickrun', {
-        "       \ 'autoload' : {
-        "       \   'mappings' : [['n', '\r']],
-        "       \   'commands' : ['QuickRun']
-        "       \ }}
-        " NeoBundle 'tpope/vim-rails'
-        " NeoBundleLazy 'vim-ruby/vim-ruby', {
-        "         \ 'autoload' : {'filetypes' : ['ruby', 'eruby']}}
-        " NeoBundle 'moll/vim-node'
     " }
     " 後処理 {
         call neobundle#end()
@@ -324,26 +323,99 @@
         NeoBundleCheck
     " }
 " }
-" vimproc {
-    if neobundle#tap('vimproc.vim')
-        call neobundle#config({
-            \       'build' : {
-            \           'windows' : 'tools\\update-dll-mingw',
-            \           'cygwin' : 'make -f make_cygwin.mak',
-            \           'mac' : 'make -f make_mac.mak',
-            \           'linux' : 'make',
-            \           'unix' : 'gmake',
-            \       }
-            \   })
 
-        function! neobundle#tapped.hooks.on_source(bundle)
+function! s:base_class(name)
+    let this = {}
+
+    let this.name       = a:name
+    let this.initialize = {}
+    let this.configure  = {}
+    let this.commands  = {}
+
+    function! this.get_name()
+        return self.name
+    endfunction
+
+    function! this.initialize.key_mapping()
+    endfunction
+
+    function! this.initialize.execute()
+        call self.key_mapping()
+    endfunction
+
+    function! this.configure.execute()
+    endfunction
+
+    return this
+endfunction
+
+function! s:get_class_name(instance)
+    return a:instance.get_name()
+endfunction
+
+function! s:initialize(instance)
+    call a:instance.initialize.execute(a:instance)
+endfunction
+
+function! s:configure(instance)
+    call a:instance.configure.execute(a:instance)
+endfunction
+
+
+" vimproc.vim {
+    let s:vimproc = {'name': 'vimproc.vim'}
+    if neobundle#tap(s:vimproc.name)
+        function! s:vimproc.initialize()
+            call neobundle#config({
+                \       'build' : {
+                \           'windows' : 'tools\\update-dll-mingw',
+                \           'cygwin' : 'make -f make_cygwin.mak',
+                \           'mac' : 'make -f make_mac.mak',
+                \           'linux' : 'make',
+                \           'unix' : 'gmake',
+                \       }
+                \ })
         endfunction
 
+        function! s:vimproc.configure()
+        endfunction
+
+        function! neobundle#tapped.hooks.on_source(bundle)
+            call s:vimproc.configure()
+        endfunction
+
+        call s:vimproc.initialize()
         call neobundle#untap()
     endif
 " }
-" unite {
-    if neobundle#tap('unite.vim')
+" unite.vim {
+function! s:unite_class(name)
+    let this = s:base_class(a:name)
+    let this.base = deepcopy(this)
+
+    function! this.initialize.key_mapping() abort
+        nnoremap ,b :<C-u>Unite -buffer-name=unite_buffer -no-quit -keep-focus -winheight=8 buffer<CR>
+        nnoremap ,t :<C-u>Unite -buffer-name=unite_buffer_tab -no-quit -keep-focus -winheight=8 tab<CR>
+        nnoremap ,y :<C-u>Unite -buffer-name=unite_buffer_tab -no-quit -keep-focus -winheight=8 buffer_tab<CR>
+        nnoremap ,i :<C-u>Unite -buffer-name=unite_file -no-quit -keep-focus -winheight=8 file<CR>
+        nnoremap ,l :<C-u>UniteWithBufferDir -buffer-name=unite_with_buffer_dir_file -no-quit -keep-focus -winheight=8 file<CR>
+        nnoremap ,m :<C-u>Unite -buffer-name=unite_file_mru -no-quit -keep-focus -winheight=8 file_mru<CR>
+        nnoremap ,r :<C-u>Unite -buffer-name=unite_register -no-quit -keep-focus -winheight=8 register<CR>
+        nnoremap ,o :<C-u>Unite -buffer-name=unite_outline -no-quit -keep-focus -no-truncate -vertical -create -winwidth=42 outline<CR>
+
+        nnoremap ,g :execute ':Unite -buffer-name=unite_grep -no-quit -keep-focus -winheight=8 grep:' . getcwd() . '::'<Left>
+        nnoremap ,v :execute ':Unite -buffer-name=unite_vimgrep -no-quit -keep-focus -winheight=8 vimgrep:' . getcwd() . '/**/*.'<Left>
+        nnoremap ,f :execute ':Unite -buffer-name=unite_find -no-quit -keep-focus -winheight=8 find:' . getcwd()<CR>
+
+        nnoremap ,ug :<C-u>UniteResume -no-quit -keep-focus unite_grep<CR>
+        nnoremap ,uv :<C-u>UniteResume -no-quit -keep-focus unite_vimgrep<CR>
+        nnoremap ,uf :<C-u>UniteResume -no-quit -keep-focus unite_find<CR>
+    endfunction
+
+    function! this.initialize.execute(this) abort
+        " 基底クラスの呼び出し
+        call call(a:this.base.initialize.execute, [], self)
+
         call neobundle#config({
             \       'autoload' : {
             \           'commands' : [
@@ -351,164 +423,217 @@
             \               'UniteWithCursorWord',
             \               'UniteWithInput',
             \           ]
-            \      }
-            \   })
+            \       }
+            \ })
+    endfunction
 
-        function! neobundle#tapped.hooks.on_source(bundle)
-            let g:unite_kind_jump_list_after_jump_scroll=0
-            let g:unite_enable_start_insert = 0
-            let g:unite_source_rec_min_cache_files = 1000
-            let g:unite_source_rec_max_cache_files = 5000
-            let g:unite_source_file_mru_long_limit = 6000
-            let g:unite_source_file_mru_limit = 300
-            let g:unite_source_directory_mru_long_limit = 6000
-            " let g:unite_prompt = '❯ '
-            call s:configure_unite_grep('grep')
-        endfunction
+    function! this.configure.set_grep(grep) abort
+        let g:unite_source_grep_max_candidates = 200
 
-        function! s:configure_unite_grep(grep)
-            let g:unite_source_grep_max_candidates = 200
+        if a:grep == 'hw' && executable(a:grep)
+            " Use hw(highway)
+            " https://github.com/tkengo/highway
+            let g:unite_source_grep_command = 'hw'
+            let g:unite_source_grep_default_opts = '--no-group --no-color'
+            let g:unite_source_grep_recursive_opt = ''
+        elseif a:grep == 'ag' && executable(a:grep)
+            " Use ag(the silver searcher)
+            " https://github.com/ggreer/the_silver_searcher
+            let g:unite_source_grep_command = 'ag'
+            let g:unite_source_grep_default_opts =
+                \ '-i -a --vimgrep --hidden'
+                \ . ' --ignore ''.hg'' --ignore ''.svn'' --ignore ''.git'' --ignore ''.bzr'''
+                \ . '--ignore ''.class'''
+            let g:unite_source_grep_recursive_opt = ''
+        elseif a:grep == 'pt' && executable(a:grep)
+            " Use pt(the platinum searcher)
+            " https://github.com/monochromegane/the_platinum_searcher
+            let g:unite_source_grep_command = 'pt'
+            let g:unite_source_grep_default_opts = '--nogroup --nocolor'
+            let g:unite_source_grep_recursive_opt = ''
+        elseif a:grep == 'ack-grep' && executable(a:grep)
+            " Use ack
+            " http://beyondgrep.com/
+            let g:unite_source_grep_command = 'ack-grep'
+            let g:unite_source_grep_default_opts =
+                \ '-i --no-heading --no-color -k -H'
+            let g:unite_source_grep_recursive_opt = ''
+        elseif a:grep == 'jvgrep' && executable(a:grep)
+            " Use jvgrep
+            " https://github.com/mattn/jvgrep
+            let g:unite_source_grep_command = 'jvgrep'
+            let g:unite_source_grep_default_opts =
+                \ '-i --exclude ''\.(git|svn|hg|bzr)'''
+            let g:unite_source_grep_recursive_opt = '-R'
+        elseif a:grep == 'grep'
+        endif
+    endfunction
 
-            if a:grep == 'hw' && executable(a:grep)
-                " Use hw(highway)
-                " https://github.com/tkengo/highway
-                let g:unite_source_grep_command = 'hw'
-                let g:unite_source_grep_default_opts = '--no-group --no-color'
-                let g:unite_source_grep_recursive_opt = ''
-            elseif a:grep == 'ag' && executable(a:grep)
-                " Use ag(the silver searcher)
-                " https://github.com/ggreer/the_silver_searcher
-                let g:unite_source_grep_command = 'ag'
-                let g:unite_source_grep_default_opts =
-                    \ '-i -a --vimgrep --hidden'
-                    \ . ' --ignore ''.hg'' --ignore ''.svn'' --ignore ''.git'' --ignore ''.bzr'''
-                    \ . '--ignore ''.class'''
-                let g:unite_source_grep_recursive_opt = ''
-            elseif a:grep == 'pt' && executable(a:grep)
-                " Use pt(the platinum searcher)
-                " https://github.com/monochromegane/the_platinum_searcher
-                let g:unite_source_grep_command = 'pt'
-                let g:unite_source_grep_default_opts = '--nogroup --nocolor'
-                let g:unite_source_grep_recursive_opt = ''
-            elseif a:grep == 'ack-grep' && executable(a:grep)
-                " Use ack
-                " http://beyondgrep.com/
-                let g:unite_source_grep_command = 'ack-grep'
-                let g:unite_source_grep_default_opts =
-                    \ '-i --no-heading --no-color -k -H'
-                let g:unite_source_grep_recursive_opt = ''
-            elseif a:grep == 'jvgrep' && executable(a:grep)
-                " Use jvgrep
-                " https://github.com/mattn/jvgrep
-                let g:unite_source_grep_command = 'jvgrep'
-                let g:unite_source_grep_default_opts =
-                    \ '-i --exclude ''\.(git|svn|hg|bzr)'''
-                let g:unite_source_grep_recursive_opt = '-R'
-            elseif a:grep == 'grep'
-            endif
-        endfunction
+    function! this.configure.execute(this) abort
+        let g:unite_kind_jump_list_after_jump_scroll=0
+        let g:unite_enable_start_insert = 0
+        let g:unite_source_rec_min_cache_files = 1000
+        let g:unite_source_rec_max_cache_files = 5000
+        let g:unite_source_file_mru_long_limit = 6000
+        let g:unite_source_file_mru_limit = 300
+        let g:unite_source_directory_mru_long_limit = 6000
+        " let g:unite_prompt = '❯ '
+        call a:this.configure.set_grep('grep')
+        call unite#custom_source('buffer', 'sorters', 'sorter_word')
+    endfunction
 
-        nnoremap ,b :Unite -buffer-name=unite_buffer -no-quit -keep-focus -winheight=8 buffer<CR>
-        nnoremap ,t :Unite -buffer-name=unite_buffer_tab -no-quit -keep-focus -winheight=8 buffer_tab<CR>
-        nnoremap ,i :Unite -buffer-name=unite_file -no-quit -keep-focus -winheight=8 file<CR>
-        nnoremap ,l :UniteWithBufferDir -buffer-name=unite_with_buffer_dir_file -no-quit -keep-focus -winheight=8 file<CR>
-        nnoremap ,m :Unite -buffer-name=unite_file_mru -no-quit -keep-focus -winheight=8 file_mru<CR>
-        nnoremap ,r :Unite -buffer-name=unite_register -no-quit -keep-focus -winheight=8 register<CR>
-        nnoremap ,o :Unite -buffer-name=unite_outline -no-quit -keep-focus -no-truncate -vertical -create -winwidth=42 outline<CR>
+    function! this.commands.vimgrep(pattern, directory, ...) abort
+        "a:1 == extension (example : *.py)
+        if exists('a:1')
+            let l:extension = a:1
+        else
+            let l:extension = '*'
+        endif
 
-        nnoremap ,g :execute ':Unite -buffer-name=unite_grep -no-quit -keep-focus -winheight=8 grep:'
-            \ . getcwd() . '::'<Left>
-        nnoremap ,v :execute ':Unite -buffer-name=unite_vimgrep -no-quit -keep-focus -winheight=8 vimgrep:'
-            \ . getcwd() . '/**/*.'<Left>
-        nnoremap ,f :execute ':Unite -buffer-name=unite_find -no-quit -keep-focus -winheight=8 find:'
-            \ . getcwd()<CR>
-        nnoremap ,ug :UniteResume -no-quit -keep-focus unite_grep<CR>
-        nnoremap ,uv :UniteResume -no-quit -keep-focus unite_vimgrep<CR>
-        nnoremap ,uf :UniteResume -no-quit -keep-focus unite_find<CR>
+        if a:directory == '%'
+            let l:search_path = '%'
+        elseif a:directory == 'cwd'
+            let l:search_path = getcwd() . '/**/' . a:extension
+        else
+            let l:search_path = a:directory . '/**/' . a:extension
+        endif
 
-        call neobundle#untap()
-    endif
+        execute ':Unite -buffer-name=unite_vimgrep -no-quit -keep-focus -winheight=8 vimgrep:' . l:search_path . ':' . a:pattern
+    endfunction
+
+    command! -bar -nargs=* UniteVimGrep call this.commands.vimgrep(<f-args>)
+
+    return this
+endfunction
+
+let s:plugin_obj = s:unite_class('unite.vim')
+
+if neobundle#tap(s:get_class_name(s:plugin_obj))
+    function! neobundle#tapped.hooks.on_source(bundle) abort
+        call s:configure(s:plugin_obj)
+    endfunction
+
+    call s:initialize(s:plugin_obj)
+    call neobundle#untap()
+endif
 " }
 " neomru {
-    if neobundle#tap('neomru.vim')
-        call neobundle#config({
-            \       'autoload' : {
-            \           'unite_sources' : [
-            \               'file_mru',
-            \           ],
-            \       }
-            \   })
-
-        function! neobundle#tapped.hooks.on_source(bundle)
+    let s:neomru = {'name': 'neomru.vim'}
+    if neobundle#tap(s:neomru.name)
+        function! s:neomru_initialize()
+            call neobundle#config({
+                \       'autoload' : {
+                \           'unite_sources' : [
+                \               'file_mru',
+                \           ],
+                \       }
+                \   })
         endfunction
 
+        function! s:neomru_configure()
+        endfunction
+
+        function! neobundle#tapped.hooks.on_source(bundle)
+            call s:neomru_configure()
+        endfunction
+
+        call s:neomru_initialize()
         call neobundle#untap()
     endif
 " }
 " tabpagebuffer {
     if neobundle#tap('tabpagebuffer.vim')
-        call neobundle#config({
-            \       'autoload' : {
-            \           'unite_sources' : [
-            \               'buffer_tab',
-            \           ],
-            \       }
-            \   })
-
-        function! neobundle#tapped.hooks.on_source(bundle)
+        function! s:tabpagebuffer_initialize()
+            call neobundle#config({
+                \       'autoload' : {
+                \           'unite_sources' : [
+                \               'buffer_tab',
+                \           ],
+                \       }
+                \   })
         endfunction
 
+        function! s:tabpagebuffer_configure()
+        endfunction
+
+        function! neobundle#tapped.hooks.on_source(bundle)
+            call s:tabpagebuffer_configure()
+        endfunction
+
+        call s:tabpagebuffer_initialize()
         call neobundle#untap()
     endif
 " }
 " unite-outline {
     if neobundle#tap('unite-outline')
-        call neobundle#config({
-            \       'autoload' : {
-            \           'unite_sources' : [
-            \               'outline',
-            \           ],
-            \       }
-            \   })
-
-        function! neobundle#tapped.hooks.on_source(bundle)
+        function! s:unite_outline_initialize()
+            call neobundle#config({
+                \       'autoload' : {
+                \           'unite_sources' : [
+                \               'outline',
+                \           ],
+                \       }
+                \   })
         endfunction
 
+        function! s:unite_outline_configure()
+        endfunction
+
+        function! neobundle#tapped.hooks.on_source(bundle)
+            call s:unite_outline_configure()
+        endfunction
+
+        call s:unite_outline_initialize()
         call neobundle#untap()
     endif
 " }
 " vimshell {
     if neobundle#tap('vimshell.vim')
-        call neobundle#config({
-            \       'autoload' : {
-            \           'commands' : [
-            \               {
-            \                   'name' : 'VimShell',
-            \                   'complete' : 'customlist,vimshell#complete'
-            \               },
-            \               'VimShellExecute',
-            \               'VimShellInteractive',
-            \               'VimShellTerminal',
-            \               'VimShellPop'
-            \           ]
-            \       }
-            \   })
-
-        function! neobundle#tapped.hooks.on_source(bundle)
+        function! s:vimshell_initialize()
+            call neobundle#config({
+                \       'autoload' : {
+                \           'commands' : [
+                \               {
+                \                   'name' : 'VimShell',
+                \                   'complete' : 'customlist,vimshell#complete'
+                \               },
+                \               'VimShellExecute',
+                \               'VimShellInteractive',
+                \               'VimShellTerminal',
+                \               'VimShellPop'
+                \           ]
+                \       }
+                \   })
         endfunction
 
+        function! s:vimshell_configure()
+        endfunction
+
+        function! neobundle#tapped.hooks.on_source(bundle)
+            call s:vimshell_configure()
+        endfunction
+
+        call s:vimshell_initialize()
         call neobundle#untap()
     endif
 " }
 " neocomplete {
     if neobundle#tap('neocomplete.vim')
-        call neobundle#config({
-            \       'autoload' : {
-            \           'insert' : 1,
-            \       }
-            \   })
+        function! s:neocomplete_initialize()
+            call neobundle#config({
+                \       'autoload' : {
+                \           'insert' : 1,
+                \       }
+                \   })
+        endfunction
 
-        function! neobundle#tapped.hooks.on_source(bundle)
+        function! s:neocomplete_my_cr_function()
+            " return neocomplete#close_popup() . "\<CR>"
+            " For no inserting <CR> key.
+            return pumvisible() ? neocomplete#close_popup() : "\<CR>"
+        endfunction
+
+        function! s:neocomplete_configure()
             " Note: This option must set it in .vimrc(_vimrc).
             " NOT IN .gvimrc(_gvimrc)!
             " Disable AutoComplPop.
@@ -568,7 +693,7 @@
 
             " Recommended key-mappings.
             " <CR>: close popup and save indent.
-            inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
+            inoremap <silent> <CR> <C-r>=<SID>neocomplete_my_cr_function()<CR>
             " <TAB>: completion.
             inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
             " <C-h>, <BS>: close popup and delete backword char.
@@ -594,57 +719,80 @@
             autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
             autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
             " jedi-vimを使う場合はoff
-            autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-            autocmd FileType python setlocal completeopt-=preview
+            "autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+            "autocmd FileType python setlocal completeopt-=preview
         endfunction
 
-        function! s:my_cr_function()
-            " return neocomplete#close_popup() . "\<CR>"
-            " For no inserting <CR> key.
-            return pumvisible() ? neocomplete#close_popup() : "\<CR>"
+        function! neobundle#tapped.hooks.on_source(bundle)
+            call s:neocomplete_configure()
         endfunction
 
+
+        call s:neocomplete_initialize()
         call neobundle#untap()
     endif
 " }
 " vimfiler {
-    if neobundle#tap('vimfiler.vim')
-        call neobundle#config({
-            \       'autoload' : {
-            \           'commands' : [
-            \               'VimFilerTab',
-            \               'VimFiler',
-            \               'VimFilerExplorer',
-            \               'VimFilerBufferDir',
-            \           ],
-            \           'explorer' : 1,
-            \       }
-            \   })
+    let s:vimfiler = {'name': 'vimfiler.vim'}
+    if neobundle#tap(s:vimfiler.name)
+        function! s:vimfiler.key_mapping() abort
+            "nnoremap <Leader>e :VimFiler -buffer-name=explorer -no-quit -split -winwidth=90 -simple -toggle<CR>
+            nnoremap <Leader>e :<C-u>VimFilerExplore -winwidth=45 -winminwidth=45 -fnamewidth=45<CR>
+        endfunction
 
-        function! neobundle#tapped.hooks.on_source(bundle)
+        function! s:vimfiler.initialize() abort
+            call neobundle#config({
+                \       'autoload' : {
+                \           'commands' : [
+                \               'VimFilerTab',
+                \               'VimFiler',
+                \               'VimFilerExplorer',
+                \               'VimFilerBufferDir',
+                \           ],
+                \           'explorer' : 1,
+                \       }
+                \   })
+
+            call s:vimfiler.key_mapping()
+        endfunction
+
+        function! s:vimfiler.configure() abort
             let g:vimfiler_as_default_explorer  = 1
             let g:vimfiler_safe_mode_by_default = 0
             let g:vimfiler_data_directory       = expand('~/.vim/etc/vimfiler')
             " let g:vimfiler_enable_auto_cd = 1
         endfunction
 
-        nnoremap <Leader>e :VimFiler<CR>
+        function! neobundle#tapped.hooks.on_source(bundle)
+            call s:vimfiler_configure()
+        endfunction
 
+        call s:vimfiler.initialize()
         call neobundle#untap()
     endif
 " }
 " neosnippet {
-    if neobundle#tap('neosnippet.vim')
-        call neobundle#config({
-            \       'autoload' : {
-            \           'insert' : 1,
-            \           'filetypes' : [
-            \               'snippet',
-            \           ],
-            \       }
-            \   })
+    let s:neosnippet = {'name': 'neosnippet.vim'}
+    if neobundle#tap(s:neosnippet.name)
+        function! s:neosnippet.key_mapping() abort
+            imap <C-k> <Plug>(neosnippet_expand_or_jump)
+            smap <C-k> <Plug>(neosnippet_expand_or_jump)
+        endfunction
 
-        function! neobundle#tapped.hooks.on_source(bundle)
+        function! s:neosnippet.initialize() abort
+            call neobundle#config({
+                \       'autoload' : {
+                \           'insert' : 1,
+                \           'filetypes' : [
+                \               'snippet',
+                \           ],
+                \       }
+                \   })
+
+            call s:neosnippet.key_mapping()
+        endfunction
+
+        function! s:neosnippet.configure() abort
             let g:neosnippet#data_directory = expand('~/.vim/etc/.cache/neosnippet')
             let g:neosnippet#snippets_directory = [
                 \       expand('~/.vim/.bundle/neosnippet-snippets/neosnippets'),
@@ -652,66 +800,32 @@
                 \   ]
         endfunction
 
-        imap <C-k> <Plug>(neosnippet_expand_or_jump)
-        smap <C-k> <Plug>(neosnippet_expand_or_jump)
-
-        call neobundle#untap()
-    endif
-" }
-" vim-autoclose {
-    if neobundle#tap('vim-autoclose')
-        call neobundle#config({
-            \       'autoload' : {
-            \           'insert' : 1,
-            \       }
-            \   })
-
         function! neobundle#tapped.hooks.on_source(bundle)
+            call s:neosnippet.configure()
         endfunction
 
-        call neobundle#untap()
-    endif
-" }
-" vim-endwise {
-    if neobundle#tap('vim-endwise')
-        call neobundle#config({
-            \       'autoload' : {
-            \           'insert' : 1,
-            \       }
-            \   })
-
-        function! neobundle#tapped.hooks.on_source(bundle)
-        endfunction
-
-        call neobundle#untap()
-    endif
-" }
-" vim-markdown {
-    if neobundle#tap('vim-markdown')
-        call neobundle#config({
-            \       'autoload' : {
-            \           'filetypes' : ['markdown'],
-            \       }
-            \   })
-
-        function! neobundle#tapped.hooks.on_source(bundle)
-            let g:vim_markdown_folding_disabled = 1
-        endfunction
-
+        call s:neosnippet.initialize()
         call neobundle#untap()
     endif
 " }
 " matchit.zip {
     if neobundle#tap('matchit.zip')
-        call neobundle#config({
-            \       'autoload' : {
-            \           'filetypes' : ['jsp', 'smarty', 'html', 'xml'],
-            \       }
-            \   })
-
-        function! neobundle#tapped.hooks.on_source(bundle)
+        function! s:matchit_initialize()
+            call neobundle#config({
+                \       'autoload' : {
+                \           'filetypes' : ['jsp', 'smarty', 'html', 'xml'],
+                \       }
+                \   })
         endfunction
 
+        function! s:matchit_configure()
+        endfunction
+
+        function! neobundle#tapped.hooks.on_source(bundle)
+            call s:matchit_configure()
+        endfunction
+
+        call s:matchit_initialize()
         call neobundle#untap()
     endif
 " }
@@ -723,21 +837,31 @@
             \       }
             \   })
 
-        function! neobundle#tapped.hooks.on_source(bundle)
+        function! s:vim_surround_initialize()
         endfunction
 
+        function! s:vim_surround_configure()
+        endfunction
+
+        function! neobundle#tapped.hooks.on_source(bundle)
+            call s:vim_surround_configure()
+        endfunction
+
+        call s:vim_surround_initialize()
         call neobundle#untap()
     endif
 " }
 " syntastic {
     if neobundle#tap('syntastic')
-        call neobundle#config({
-            \       'autoload' : {
-            \           'insert' : 1,
-            \       }
-            \   })
+        function! s:syntastic_initialize()
+            call neobundle#config({
+                \       'autoload' : {
+                \           'insert' : 1,
+                \       }
+                \   })
+        endfunction
 
-        function! neobundle#tapped.hooks.on_source(bundle)
+        function! s:syntastic_configure()
             " set statusline+=%#warningmsg#
             " set statusline+=%{SyntasticStatuslineFlag()}
             " set statusline+=%*
@@ -750,77 +874,118 @@
             let g:syntastic_python_checkers = ["flake8"]
         endfunction
 
+        function! neobundle#tapped.hooks.on_source(bundle)
+            call s:syntastic_configure()
+        endfunction
+
+        call s:syntastic_initialize()
         call neobundle#untap()
     endif
 " }
 " tagbar {
-    if neobundle#tap('tagbar')
-        call neobundle#config({
-            \       "autload": {
-            \           "commands": [
-            \               "TagbarToggle",
-            \           ],
-            \       }
-            \   })
-
-        function! neobundle#tapped.hooks.on_source(bundle)
-            let g:tagbar_width=34
+    let s:tagbar = {'name': 'tagbar'}
+    if neobundle#tap(s:tagbar.name)
+        function! s:tagbar.key_mapping() abort
+            nnoremap <Leader>t :<C-u>TagbarToggle<CR>
+            nnoremap <Leader>s :<C-u>TagbarShowTag<CR>
         endfunction
 
-        nnoremap <Leader>t :TagbarToggle<CR>
-        nnoremap <Leader>s :TagbarShowTag<CR>
+        function! s:tagbar.initialize() abort
+            call neobundle#config({
+                \   "autload": {
+                \       "commands": [
+                \           "TagbarToggle",
+                \       ],
+                \   }
+                \ })
 
+            call s:tagbar.key_mapping()
+        endfunction
+
+        function! s:tagbar.configure() abort
+            let g:tagbar_width=34
+            let g:tagbar_type_markdown = {
+                \   'ctagstype': 'markdown',
+                \   'ctagsbin' : '/home/ryota_kato/.vim/bundle/markdown2ctags/markdown2ctags.py',
+                \   'ctagsargs' : '-f - --sort=yes',
+                \   'kinds' : [
+                \       's:sections',
+                \       'i:images'
+                \   ],
+                \   'sro' : '|',
+                \   'kind2scope' : {
+                \       's' : 'section',
+                \   },
+                \   'sort': 0,
+                \ }
+        endfunction
+
+        function! neobundle#tapped.hooks.on_source(bundle)
+            call s:tagbar.configure()
+        endfunction
+
+        call s:tagbar.initialize()
         call neobundle#untap()
     endif
 " }
-" emmet-vim {
-    if neobundle#tap('emmet-vim')
-        call neobundle#config({
-            \       'autoload' : {
-            \           'filetypes' : [
-            \               'html',
-            \               'html5',
-            \               'eruby',
-            \               'jsp',
-            \               'xml',
-            \               'css',
-            \               'scss',
-            \               'coffee',
-            \               'smarty'
-            \           ],
-            \           'commands' : [
-            \               '<Plug>ZenCodingExpandNormal'
-            \           ]
-            \       }
-            \   })
-
-        function! neobundle#tapped.hooks.on_source(bundle)
-            let g:use_emmet_complete_tag = 1
-            let g:user_emmet_settings = {
-                \ 'variables': { 
-                \ 'lang' : 'ja' 
-                \ } ,
-                \ 'html' : {
-                \   'indentation' : '  '
-                \ }}
+" tabular {
+    if neobundle#tap('tabular')
+        function! s:tabular_initialize()
+            call neobundle#config({
+                \       'autoload' : {
+                \           'filetypes' : ['markdown'],
+                \       }
+                \   })
         endfunction
 
+        function! s:tabular_configure()
+        endfunction
+
+        function! neobundle#tapped.hooks.on_source(bundle)
+            call s:tabular_configure()
+        endfunction
+
+        call s:tabular_initialize()
+        call neobundle#untap()
+    endif
+" }
+" vim-markdown {
+    if neobundle#tap('vim-markdown')
+        function! s:vim_markdown_initialize()
+            call neobundle#config({
+                \   'autoload' : {
+                \       'filetypes' : ['markdown'],
+                \   }
+                \ })
+        endfunction
+
+        function! s:vim_markdown_configure()
+            let g:vim_markdown_folding_disabled = 1
+        endfunction
+
+        function! neobundle#tapped.hooks.on_source(bundle)
+            call s:vim_markdown_configure()
+        endfunction
+
+        call s:vim_markdown_initialize()
         call neobundle#untap()
     endif
 " }
 " jedi-vim {
     if neobundle#tap('jedi-vim')
-        call neobundle#config({
-            \       "autoload": {
-            \           "filetypes": [
-            \               "python",
-            \               "python3",
-            \               "djangohtml",
-            \           ],
-            \       }
-            \   })
+        function! s:jedi_vim_initialize()
+            call neobundle#config({
+                \   "autoload": {
+                \       "filetypes": [
+                \           "python",
+                \           "python3",
+                \           "djangohtml",
+                \       ],
+                \   }
+                \ })
+        endfunction
 
-        function! neobundle#tapped.hooks.on_source(bundle)
+        function! s:jedi_vim_configure()
             " quickrunと被るため大文字に変更
             let g:jedi#rename_command = '<Leader>R'
             let g:jedi#goto_assignments_command = '<Leader>G'
@@ -844,85 +1009,105 @@
             autocmd FileType python setlocal completeopt-=preview
         endfunction
 
-
-        call neobundle#untap()
-    endif
-" }
-" vim-django-support {
-    if neobundle#tap('vim-django-support')
-        call neobundle#config({
-            \       "autoload": {
-            \           "filetypes": [
-            \               "python",
-            \               "python3",
-            \               "djangohtml",
-            \           ],
-            \       }
-            \   })
-
         function! neobundle#tapped.hooks.on_source(bundle)
+            call s:jedi_vim_configure()
         endfunction
 
+        call s:jedi_vim_initialize()
         call neobundle#untap()
     endif
 " }
 " vim-virtualenv {
     if neobundle#tap('vim-virtualenv')
-        call neobundle#config({
-            \       "autoload": {
-            \           "filetypes": [
-            \               "python",
-            \               "python3",
-            \               "djangohtml",
-            \           ],
-            \       }
-            \   })
-
-        function! neobundle#tapped.hooks.on_source(bundle)
+        function! s:vim_virtualenv_initialize()
+            call neobundle#config({
+                \       "autoload": {
+                \           "filetypes": [
+                \               "python",
+                \               "python3",
+                \               "djangohtml",
+                \           ],
+                \       }
+                \   })
         endfunction
 
+        function! s:vim_virtualenv_configure()
+        endfunction
+
+        function! neobundle#tapped.hooks.on_source(bundle)
+            call s:vim_virtualenv_configure()
+        endfunction
+
+        call s:vim_virtualenv_initialize()
         call neobundle#untap()
     endif
 " }
-" yankround.vim {
-"    if neobundle#tap('yankround.vim')
-"        call neobundle#config({
-"            \   })
-"
-"        function! neobundle#tapped.hooks.on_source(bundle)
-"            let g:yankround_max_history = 100
-"        endfunction
-"
-"        nmap p <Plug>(yankround-p)
-"        nmap P <Plug>(yankround-P)
-"        nmap <C-p> <Plug>(yankround-prev)
-"        nmap <C-n> <Plug>(yankround-next)
-"        nnoremap <Leader><C-p> :Unite yankround<CR>
-"
-"        call neobundle#untap()
-"    endif
+" vim-django-support {
+    if neobundle#tap('vim-django-support')
+        function! s:vim_django_support_initialize()
+            call neobundle#config({
+                \       "autoload": {
+                \           "filetypes": [
+                \               "python",
+                \               "python3",
+                \               "djangohtml",
+                \           ],
+                \       }
+                \   })
+        endfunction
+
+        function! s:vim_django_support_configure()
+        endfunction
+
+        function! neobundle#tapped.hooks.on_source(bundle)
+            call s:vim_django_support_configure()
+        endfunction
+
+        call s:vim_django_support_initialize()
+        call neobundle#untap()
+    endif
 " }
-" switch.vim {
-"    nnoremap + :Switch<CR>
-"    nnoremap - :Switch<CR>
-" }
-" open-browser.vim {
-"    let g:netrw_nogx = 1 " disable netrw's gx mapping.
-"    nmap gx <Plug>(openbrowser-smart-search)
-" }
-" dash.vim {
-"    nmap <Leader>d <Plug>DashSearch
-" }
-" vim-quickrun {
-"    let g:quickrun_config = {}
-"    let g:quickrun_config._ = { 'runner' : 'vimproc',
-"            \ 'runner/vimproc/updatetime' : 200,
-"            \ 'outputter/buffer/split' : ':botright 8sp',
-"            \ 'outputter' : 'multi:buffer:quickfix',
-"            \ 'hook/close_buffer/enable_empty_data' : 1,
-"            \ 'hook/close_buffer/enable_failure' : 1,
-"            \ }
-"    nnoremap <expr><silent> <C-c> quickrun#is_running() ? quickrun#sweep_sessions() : "\<C-c>"
+" emmet-vim {
+    if neobundle#tap('emmet-vim')
+        function! s:emmet_vim_initialize()
+            call neobundle#config({
+                \       'autoload' : {
+                \           'filetypes' : [
+                \               'html',
+                \               'html5',
+                \               'eruby',
+                \               'jsp',
+                \               'xml',
+                \               'css',
+                \               'scss',
+                \               'coffee',
+                \               'smarty'
+                \           ],
+                \           'commands' : [
+                \               '<Plug>ZenCodingExpandNormal'
+                \           ]
+                \       }
+                \   })
+        endfunction
+
+        function! s:emmet_vim_configure()
+            let g:use_emmet_complete_tag = 1
+            let g:user_emmet_settings = {
+                \ 'variables': { 
+                \ 'lang' : 'ja' 
+                \ } ,
+                \ 'html' : {
+                \   'indentation' : '  '
+                \ }}
+        endfunction
+
+        function! neobundle#tapped.hooks.on_source(bundle)
+            call s:emmet_vim_configure()
+        endfunction
+
+        call s:emmet_vim_initialize()
+        call neobundle#untap()
+    endif
 " }
 " 後処理 {
     syntax on
