@@ -361,6 +361,8 @@ function! s:configure(instance)
     call a:instance.configure.execute(a:instance)
 endfunction
 
+let s:plugin_obj_list = []
+
 
 " vimproc.vim {
     let s:vimproc = {'name': 'vimproc.vim'}
@@ -413,7 +415,6 @@ function! s:unite_class(name)
     endfunction
 
     function! this.initialize.execute(this) abort
-        " 基底クラスの呼び出し
         call call(a:this.base.initialize.execute, [], self)
 
         call neobundle#config({
@@ -478,27 +479,27 @@ function! s:unite_class(name)
         let g:unite_source_file_mru_limit = 300
         let g:unite_source_directory_mru_long_limit = 6000
         " let g:unite_prompt = '❯ '
-        call a:this.configure.set_grep('grep')
+        call self.set_grep('grep')
         call unite#custom_source('buffer', 'sorters', 'sorter_word')
     endfunction
 
     function! this.commands.vimgrep(pattern, directory, ...) abort
         "a:1 == extension (example : *.py)
         if exists('a:1')
-            let l:extension = a:1
+            let extension = a:1
         else
-            let l:extension = '*'
+            let extension = '*'
         endif
 
         if a:directory == '%'
-            let l:search_path = '%'
+            let search_path = '%'
         elseif a:directory == 'cwd'
-            let l:search_path = getcwd() . '/**/' . a:extension
+            let search_path = getcwd() . '/**/' . a:extension
         else
-            let l:search_path = a:directory . '/**/' . a:extension
+            let search_path = a:directory . '/**/' . a:extension
         endif
 
-        execute ':Unite -buffer-name=unite_vimgrep -no-quit -keep-focus -winheight=8 vimgrep:' . l:search_path . ':' . a:pattern
+        execute ':Unite -buffer-name=unite_vimgrep -no-quit -keep-focus -winheight=8 vimgrep:' . search_path . ':' . a:pattern
     endfunction
 
     command! -bar -nargs=* UniteVimGrep call this.commands.vimgrep(<f-args>)
@@ -506,16 +507,6 @@ function! s:unite_class(name)
     return this
 endfunction
 
-let s:plugin_obj = s:unite_class('unite.vim')
-
-if neobundle#tap(s:get_class_name(s:plugin_obj))
-    function! neobundle#tapped.hooks.on_source(bundle) abort
-        call s:configure(s:plugin_obj)
-    endfunction
-
-    call s:initialize(s:plugin_obj)
-    call neobundle#untap()
-endif
 " }
 " neomru {
     let s:neomru = {'name': 'neomru.vim'}
@@ -764,7 +755,7 @@ endif
         endfunction
 
         function! neobundle#tapped.hooks.on_source(bundle)
-            call s:vimfiler_configure()
+            call s:vimfiler.configure()
         endfunction
 
         call s:vimfiler.initialize()
@@ -1109,6 +1100,21 @@ endif
         call neobundle#untap()
     endif
 " }
+
+
+call add(s:plugin_obj_list, s:unite_class('unite.vim'))
+
+for s:plugin_obj in s:plugin_obj_list
+    if neobundle#tap(s:get_class_name(s:plugin_obj))
+        function! neobundle#tapped.hooks.on_source(bundle) abort
+            call s:configure(s:plugin_obj)
+        endfunction
+
+        call s:initialize(s:plugin_obj)
+        call neobundle#untap()
+    endif
+endfor
+
 " 後処理 {
     syntax on
     colorscheme jellybeans
