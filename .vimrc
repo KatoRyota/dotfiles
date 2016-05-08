@@ -245,12 +245,7 @@
         autocmd BufReadPost,FileReadPost * call s:set_match_words()
     " }}}
     " ウィンドウ {
-        nnoremap ,wh :resize +4<CR>
-        nnoremap ,ww :vertical resize +4<CR>
-        nnoremap ,we :vertical resize 120<CR>
-        nnoremap ,wv :vertical resize 34<CR>
-        nnoremap ,wt :vertical resize 30<CR>
-        nnoremap ,wa <C-w>h <C-w>h <C-w>h 34<C-w>\| <C-w>l 120<C-w>\| <C-w>l 30<C-w>\|
+        nnoremap ,wa <C-w>h <C-w>h <C-w>h 45<C-w>\| <C-w>l 120<C-w>\| <C-w>l 34<C-w>\|
     " }
 " }
 " プラグイン {
@@ -329,20 +324,20 @@ function! s:base_class(name)
 
     let self.name       = a:name
     let self.initialize = {}
-    let self.configure  = {}
 
     function! self.get_name()
         return self.name
     endfunction
 
-    function! self.initialize.key_mapping()
+    function! self.initialize.mapping_key()
+    endfunction
+
+    function! self.initialize.difine_command()
     endfunction
 
     function! self.initialize.execute()
-        call self.key_mapping()
-    endfunction
-
-    function! self.configure.execute()
+        call self.mapping_key()
+        call self.difine_command()
     endfunction
 
     return self
@@ -356,8 +351,10 @@ function! s:initialize(instance)
     call a:instance.initialize.execute(a:instance)
 endfunction
 
-function! s:configure(instance)
-    call a:instance.configure.execute(a:instance)
+function! s:get_noextention_name(plugin_name)
+    let str = substitute(a:plugin_name, '\([^.]*\)\..*', '\1', 'g')
+    let str = substitute(str, '-', '_', 'g')
+    return str
 endfunction
 
 let s:plugin_obj_list = []
@@ -366,32 +363,46 @@ let s:plugin_obj_list = []
 " 下記のようにクラスを作成して『s:plugin_obj_list』に追加する。
 "--------------------------------------------------
 
-"function! s:${class name}(name)
+"let s:plugin_name = '${plugin_name}'
+"let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+"
+"function! s:{s:plugin_noextention_name}(name)
 "    let self = s:base_class(a:name)
 "    let self.base = deepcopy(self)
 "
-"    function! self.initialize.key_mapping() abort
+"    function! self.initialize.mapping_key() abort
+"    endfunction
+"
+"    function! self.initialize.difine_command() abort
 "    endfunction
 "
 "    function! self.initialize.execute(self) abort
 "        call call(a:self.base.initialize.execute, [], self)
+"
+"        "TODO : Please implementation
 "    endfunction
 "
-"    function! self.configure.execute(self) abort
+"    function! s:configure_{s:plugin_noextention_name}() abort
 "    endfunction
 "
 "    return self
 "endfunction
 "
-"call add(s:plugin_obj_list, s:${class name}('${plugin name}'))
+"call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 
 
 " vimproc.vim {
-function! s:vimproc_class(name)
+let s:plugin_name = 'vimproc.vim'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
     let self = s:base_class(a:name)
     let self.base = deepcopy(self)
 
-    function! self.initialize.key_mapping() abort
+    function! self.initialize.mapping_key() abort
+    endfunction
+
+    function! self.initialize.difine_command() abort
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -408,105 +419,42 @@ function! s:vimproc_class(name)
             \ })
     endfunction
 
-    function! self.configure.execute(self) abort
+    function! s:configure_vimproc() abort
     endfunction
 
     return self
 endfunction
 
-call add(s:plugin_obj_list, s:vimproc_class('vimproc.vim'))
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
 " unite.vim {
-function! s:unite_class(name)
+let s:plugin_name = 'unite.vim'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
     let self = s:base_class(a:name)
     let self.base = deepcopy(self)
 
-    function! self.initialize.key_mapping() abort
+    function! self.initialize.mapping_key() abort
         nnoremap ,b :<C-u>Unite -buffer-name=unite_buffer -no-quit -keep-focus -winheight=8 buffer<CR>
-        nnoremap ,t :<C-u>Unite -buffer-name=unite_buffer_tab -no-quit -keep-focus -winheight=8 tab<CR>
-        nnoremap ,y :<C-u>Unite -buffer-name=unite_buffer_tab -no-quit -keep-focus -winheight=8 buffer_tab<CR>
-        nnoremap ,i :<C-u>Unite -buffer-name=unite_file -no-quit -keep-focus -winheight=8 file<CR>
+        "nnoremap ,t :<C-u>Unite -buffer-name=unite_buffer_tab -no-quit -keep-focus -winheight=8 tab<CR>
+        "nnoremap ,y :<C-u>Unite -buffer-name=unite_buffer_tab -no-quit -keep-focus -winheight=8 buffer_tab<CR>
+        "nnoremap ,i :<C-u>Unite -buffer-name=unite_file -no-quit -keep-focus -winheight=8 file<CR>
         nnoremap ,l :<C-u>UniteWithBufferDir -buffer-name=unite_with_buffer_dir_file -no-quit -keep-focus -winheight=8 file<CR>
         nnoremap ,m :<C-u>Unite -buffer-name=unite_file_mru -no-quit -keep-focus -winheight=8 file_mru<CR>
         nnoremap ,r :<C-u>Unite -buffer-name=unite_register -no-quit -keep-focus -winheight=8 register<CR>
-        nnoremap ,o :<C-u>Unite -buffer-name=unite_outline -no-quit -keep-focus -no-truncate -vertical -create -winwidth=42 outline<CR>
+        "nnoremap ,o :<C-u>Unite -buffer-name=unite_outline -no-quit -keep-focus -no-truncate -vertical -create -winwidth=42 outline<CR>
 
-        nnoremap ,g :execute ':Unite -buffer-name=unite_grep -no-quit -keep-focus -winheight=8 grep:' . getcwd() . '::'<Left>
-        nnoremap ,v :execute ':Unite -buffer-name=unite_vimgrep -no-quit -keep-focus -winheight=8 vimgrep:' . getcwd() . '/**/*.'<Left>
-        nnoremap ,f :execute ':Unite -buffer-name=unite_find -no-quit -keep-focus -winheight=8 find:' . getcwd()<CR>
+        "nnoremap ,g :execute ':Unite -buffer-name=unite_grep -no-quit -keep-focus -winheight=8 grep:' . getcwd() . '::'<Left>
+        nnoremap ,v :<C-u>UniteVimGrep<Space>
+        nnoremap ,f :<C-u>UniteFind<Space>
 
-        nnoremap ,ug :<C-u>UniteResume -no-quit -keep-focus unite_grep<CR>
-        nnoremap ,uv :<C-u>UniteResume -no-quit -keep-focus unite_vimgrep<CR>
-        nnoremap ,uf :<C-u>UniteResume -no-quit -keep-focus unite_find<CR>
-    endfunction
+        "nnoremap ,ug :<C-u>UniteResume -no-quit -keep-focus unite_grep<CR>
+        nnoremap ,uv :<C-u>UniteResume -no-quit -keep-focus -winheight=8 unite_vimgrep<CR>
+        nnoremap ,uf :<C-u>UniteResume -no-quit -keep-focus -winheight=8 unite_find<CR>
 
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
-
-        call neobundle#config({
-            \       'autoload' : {
-            \           'commands' : [
-            \               'Unite',
-            \               'UniteWithCursorWord',
-            \               'UniteWithInput',
-            \           ]
-            \       }
-            \ })
-    endfunction
-
-    function! self.configure.set_grep(grep) abort
-        let g:unite_source_grep_max_candidates = 200
-
-        if a:grep == 'hw' && executable(a:grep)
-            " Use hw(highway)
-            " https://github.com/tkengo/highway
-            let g:unite_source_grep_command = 'hw'
-            let g:unite_source_grep_default_opts = '--no-group --no-color'
-            let g:unite_source_grep_recursive_opt = ''
-        elseif a:grep == 'ag' && executable(a:grep)
-            " Use ag(the silver searcher)
-            " https://github.com/ggreer/the_silver_searcher
-            let g:unite_source_grep_command = 'ag'
-            let g:unite_source_grep_default_opts =
-                \ '-i -a --vimgrep --hidden'
-                \ . ' --ignore ''.hg'' --ignore ''.svn'' --ignore ''.git'' --ignore ''.bzr'''
-                \ . '--ignore ''.class'''
-            let g:unite_source_grep_recursive_opt = ''
-        elseif a:grep == 'pt' && executable(a:grep)
-            " Use pt(the platinum searcher)
-            " https://github.com/monochromegane/the_platinum_searcher
-            let g:unite_source_grep_command = 'pt'
-            let g:unite_source_grep_default_opts = '--nogroup --nocolor'
-            let g:unite_source_grep_recursive_opt = ''
-        elseif a:grep == 'ack-grep' && executable(a:grep)
-            " Use ack
-            " http://beyondgrep.com/
-            let g:unite_source_grep_command = 'ack-grep'
-            let g:unite_source_grep_default_opts =
-                \ '-i --no-heading --no-color -k -H'
-            let g:unite_source_grep_recursive_opt = ''
-        elseif a:grep == 'jvgrep' && executable(a:grep)
-            " Use jvgrep
-            " https://github.com/mattn/jvgrep
-            let g:unite_source_grep_command = 'jvgrep'
-            let g:unite_source_grep_default_opts =
-                \ '-i --exclude ''\.(git|svn|hg|bzr)'''
-            let g:unite_source_grep_recursive_opt = '-R'
-        elseif a:grep == 'grep'
-        endif
-    endfunction
-
-    function! self.configure.execute(self) abort
-        let g:unite_kind_jump_list_after_jump_scroll=0
-        let g:unite_enable_start_insert = 0
-        let g:unite_source_rec_min_cache_files = 1000
-        let g:unite_source_rec_max_cache_files = 5000
-        let g:unite_source_file_mru_long_limit = 6000
-        let g:unite_source_file_mru_limit = 300
-        let g:unite_source_directory_mru_long_limit = 6000
-        " let g:unite_prompt = '❯ '
-        call self.set_grep('grep')
-        call unite#custom_source('buffer', 'sorters', 'sorter_word')
+        nnoremap ,] :<C-u>UniteWithCursorWord -no-quit -keep-focus -winheight=8 -immediately tag<CR>
+        nnoremap ,t :<C-u>Unite jump<CR>
     endfunction
 
     function! s:unite_vimgrep(pattern, directory, ...) abort
@@ -528,19 +476,65 @@ function! s:unite_class(name)
         execute ':Unite -buffer-name=unite_vimgrep -no-quit -keep-focus -winheight=8 vimgrep:' . search_path . ':' . a:pattern
     endfunction
 
-    command! -bar -nargs=* UniteVimGrep call s:unite_vimgrep(<f-args>)
+    function! s:unite_find(...) abort
+        "a:1 == ${find option}
+        if exists('a:1')
+            let option = a:1
+        else
+            let option = ''
+        endif
+
+        execute ':Unite -buffer-name=unite_find -no-quit -keep-focus -winheight=8 find:' . getcwd() . ':' . option
+    endfunction
+
+    function! self.initialize.difine_command() abort
+        command! -bar -nargs=+ UniteVimGrep call s:unite_vimgrep(<f-args>)
+        command! -bar -nargs=1 UniteFind call s:unite_find(<f-args>)
+    endfunction
+
+    function! self.initialize.execute(self) abort
+        call call(a:self.base.initialize.execute, [], self)
+
+        call neobundle#config({
+            \   'autoload' : {
+            \       'commands' : [
+            \           'Unite',
+            \           'UniteWithCursorWord',
+            \           'UniteWithInput',
+            \       ]
+            \   }
+            \ })
+    endfunction
+
+    function! s:configure_unite() abort
+        let g:unite_kind_jump_list_after_jump_scroll=0
+        let g:unite_enable_start_insert = 0
+        let g:unite_source_rec_min_cache_files = 1000
+        let g:unite_source_rec_max_cache_files = 5000
+        let g:unite_source_file_mru_long_limit = 6000
+        let g:unite_source_file_mru_limit = 300
+        let g:unite_source_directory_mru_long_limit = 6000
+        " let g:unite_prompt = '❯ '
+        call unite#custom_source('buffer', 'sorters', 'sorter_word')
+    endfunction
 
     return self
 endfunction
 
-call add(s:plugin_obj_list, s:unite_class('unite.vim'))
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
 " neomru {
-function! s:neomru_class(name)
+let s:plugin_name = 'neomru.vim'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
     let self = s:base_class(a:name)
     let self.base = deepcopy(self)
 
-    function! self.initialize.key_mapping() abort
+    function! self.initialize.mapping_key() abort
+    endfunction
+
+    function! self.initialize.difine_command() abort
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -555,20 +549,26 @@ function! s:neomru_class(name)
             \ })
     endfunction
 
-    function! self.configure.execute(self) abort
+    function! s:configure_neomru() abort
     endfunction
 
     return self
 endfunction
 
-call add(s:plugin_obj_list, s:neomru_class('neomru.vim'))
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
 " tabpagebuffer {
-function! s:tabpagebuffer_class(name)
+let s:plugin_name = 'tabpagebuffer.vim'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
     let self = s:base_class(a:name)
     let self.base = deepcopy(self)
 
-    function! self.initialize.key_mapping() abort
+    function! self.initialize.mapping_key() abort
+    endfunction
+
+    function! self.initialize.difine_command() abort
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -583,20 +583,26 @@ function! s:tabpagebuffer_class(name)
             \ })
     endfunction
 
-    function! self.configure.execute(self) abort
+    function! s:configure_tabpagebuffer() abort
     endfunction
 
     return self
 endfunction
 
-call add(s:plugin_obj_list, s:tabpagebuffer_class('tabpagebuffer.vim'))
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
 " unite-outline {
-function! s:unite_outline_class(name)
+let s:plugin_name = 'unite-outline'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
     let self = s:base_class(a:name)
     let self.base = deepcopy(self)
 
-    function! self.initialize.key_mapping() abort
+    function! self.initialize.mapping_key() abort
+    endfunction
+
+    function! self.initialize.difine_command() abort
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -611,20 +617,26 @@ function! s:unite_outline_class(name)
             \ })
     endfunction
 
-    function! self.configure.execute(self) abort
+    function! s:configure_unite_outline() abort
     endfunction
 
     return self
 endfunction
 
-call add(s:plugin_obj_list, s:unite_outline_class('unite-outline'))
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
 " vimshell {
-function! s:vimshell_class(name)
+let s:plugin_name = 'vimshell.vim'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
     let self = s:base_class(a:name)
     let self.base = deepcopy(self)
 
-    function! self.initialize.key_mapping() abort
+    function! self.initialize.mapping_key() abort
+    endfunction
+
+    function! self.initialize.difine_command() abort
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -646,22 +658,28 @@ function! s:vimshell_class(name)
             \ })
     endfunction
 
-    function! self.configure.execute(self) abort
+    function! s:configure_vimshell() abort
     endfunction
 
     return self
 endfunction
 
-call add(s:plugin_obj_list, s:vimshell_class('vimshell.vim'))
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
 " neosnippet {
-function! s:neosnippet_class(name)
+let s:plugin_name = 'neosnippet.vim'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
     let self = s:base_class(a:name)
     let self.base = deepcopy(self)
 
-    function! self.initialize.key_mapping() abort
+    function! self.initialize.mapping_key() abort
         imap <C-k> <Plug>(neosnippet_expand_or_jump)
         smap <C-k> <Plug>(neosnippet_expand_or_jump)
+    endfunction
+
+    function! self.initialize.difine_command() abort
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -674,7 +692,7 @@ function! s:neosnippet_class(name)
             \ })
     endfunction
 
-    function! self.configure.execute(self) abort
+    function! s:configure_neosnippet() abort
         let g:neosnippet#data_directory = expand('~/.vim/etc/.cache/neosnippet')
         let g:neosnippet#snippets_directory = expand('~/.vim/bundle/vim-snippets/snippets')
     endfunction
@@ -682,10 +700,13 @@ function! s:neosnippet_class(name)
     return self
 endfunction
 
-call add(s:plugin_obj_list, s:neosnippet_class('neosnippet.vim'))
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
 " neocomplete {
-function! s:neocomplete_class(name)
+let s:plugin_name = 'neocomplete.vim'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
     let self = s:base_class(a:name)
     let self.base = deepcopy(self)
 
@@ -695,7 +716,7 @@ function! s:neocomplete_class(name)
         return pumvisible() ? neocomplete#close_popup() : "\<CR>"
     endfunction
 
-    function! self.initialize.key_mapping() abort
+    function! self.initialize.mapping_key() abort
         " Plugin key-mappings.
         inoremap <expr><C-g>     neocomplete#undo_completion()
         inoremap <expr><C-l>     neocomplete#complete_common_string()
@@ -724,6 +745,9 @@ function! s:neocomplete_class(name)
         " endfunction"}}}
     endfunction
 
+    function! self.initialize.difine_command() abort
+    endfunction
+
     function! self.initialize.execute(self) abort
         call call(a:self.base.initialize.execute, [], self)
 
@@ -734,7 +758,7 @@ function! s:neocomplete_class(name)
             \ })
     endfunction
 
-    function! self.configure.execute(self) abort
+    function! s:configure_neocomplete() abort
         " Note: This option must set it in .vimrc(_vimrc).
         " NOT IN .gvimrc(_gvimrc)!
         " Disable AutoComplPop.
@@ -801,16 +825,22 @@ function! s:neocomplete_class(name)
     return self
 endfunction
 
-call add(s:plugin_obj_list, s:neocomplete_class('neocomplete.vim'))
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
 " vimfiler {
-function! s:vimfiler_class(name)
+let s:plugin_name = 'vimfiler.vim'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
     let self = s:base_class(a:name)
     let self.base = deepcopy(self)
 
-    function! self.initialize.key_mapping() abort
+    function! self.initialize.mapping_key() abort
         "nnoremap <Leader>e :VimFiler -buffer-name=explorer -no-quit -split -winwidth=90 -simple -toggle<CR>
         nnoremap <Leader>e :<C-u>VimFilerExplore -winwidth=45 -winminwidth=45 -fnamewidth=45<CR>
+    endfunction
+
+    function! self.initialize.difine_command() abort
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -829,7 +859,7 @@ function! s:vimfiler_class(name)
             \ })
     endfunction
 
-    function! self.configure.execute(self) abort
+    function! s:configure_vimfiler() abort
         let g:vimfiler_as_default_explorer  = 1
         let g:vimfiler_safe_mode_by_default = 0
         let g:vimfiler_data_directory       = expand('~/.vim/etc/vimfiler')
@@ -839,39 +869,57 @@ function! s:vimfiler_class(name)
     return self
 endfunction
 
-call add(s:plugin_obj_list, s:vimfiler_class('vimfiler.vim'))
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
 " matchit.zip {
-function! s:matchit_class(name)
+let s:plugin_name = 'matchit.zip'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
     let self = s:base_class(a:name)
     let self.base = deepcopy(self)
 
-    function! self.initialize.key_mapping() abort
-        call neobundle#config({
-            \   'autoload' : {
-            \       'filetypes' : ['jsp', 'smarty', 'html', 'xml'],
-            \   }
-            \ })
+    function! self.initialize.mapping_key() abort
+    endfunction
+
+    function! self.initialize.difine_command() abort
     endfunction
 
     function! self.initialize.execute(self) abort
         call call(a:self.base.initialize.execute, [], self)
+
+        call neobundle#config({
+            \   'autoload' : {
+            \       'filetypes' : [
+            \           'jsp',
+            \           'smarty',
+            \           'html',
+            \           'xml',
+            \       ],
+            \   }
+            \ })
     endfunction
 
-    function! self.configure.execute(self) abort
+    function! s:configure_matchit() abort
     endfunction
 
     return self
 endfunction
 
-call add(s:plugin_obj_list, s:matchit_class('matchit.zip'))
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
 " vim-surround {
-function! s:vim_surround_class(name)
+let s:plugin_name = 'vim-surround'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
     let self = s:base_class(a:name)
     let self.base = deepcopy(self)
 
-    function! self.initialize.key_mapping() abort
+    function! self.initialize.mapping_key() abort
+    endfunction
+
+    function! self.initialize.difine_command() abort
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -884,20 +932,26 @@ function! s:vim_surround_class(name)
             \ })
     endfunction
 
-    function! self.configure.execute(self) abort
+    function! s:configure_vim_surround() abort
     endfunction
 
     return self
 endfunction
 
-call add(s:plugin_obj_list, s:vim_surround_class('vim-surround'))
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
 " syntastic {
-function! s:syntastic_class(name)
+let s:plugin_name = 'syntastic'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
     let self = s:base_class(a:name)
     let self.base = deepcopy(self)
 
-    function! self.initialize.key_mapping() abort
+    function! self.initialize.mapping_key() abort
+    endfunction
+
+    function! self.initialize.difine_command() abort
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -910,7 +964,7 @@ function! s:syntastic_class(name)
             \ })
     endfunction
 
-    function! self.configure.execute(self) abort
+    function! s:configure_syntastic() abort
         " set statusline+=%#warningmsg#
         " set statusline+=%{SyntasticStatuslineFlag()}
         " set statusline+=%*
@@ -926,16 +980,22 @@ function! s:syntastic_class(name)
     return self
 endfunction
 
-call add(s:plugin_obj_list, s:syntastic_class('syntastic'))
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
 " tagbar {
-function! s:tagbar_class(name)
+let s:plugin_name = 'tagbar'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
     let self = s:base_class(a:name)
     let self.base = deepcopy(self)
 
-    function! self.initialize.key_mapping() abort
+    function! self.initialize.mapping_key() abort
         nnoremap <Leader>t :<C-u>TagbarToggle<CR>
         nnoremap <Leader>s :<C-u>TagbarShowTag<CR>
+    endfunction
+
+    function! self.initialize.difine_command() abort
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -950,8 +1010,8 @@ function! s:tagbar_class(name)
             \ })
     endfunction
 
-    function! self.configure.execute(self) abort
-        let g:tagbar_width=34
+    function! s:configure_tagbar() abort
+        let g:tagbar_width = 34
         let g:tagbar_type_markdown = {
             \   'ctagstype': 'markdown',
             \   'ctagsbin' : expand('~/.vim/bundle/markdown2ctags/markdown2ctags.py'),
@@ -971,14 +1031,20 @@ function! s:tagbar_class(name)
     return self
 endfunction
 
-call add(s:plugin_obj_list, s:tagbar_class('tagbar'))
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
 " tabular {
-function! s:tabular_class(name)
+let s:plugin_name = 'tabular'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
     let self = s:base_class(a:name)
     let self.base = deepcopy(self)
 
-    function! self.initialize.key_mapping() abort
+    function! self.initialize.mapping_key() abort
+    endfunction
+
+    function! self.initialize.difine_command() abort
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -991,20 +1057,26 @@ function! s:tabular_class(name)
             \ })
     endfunction
 
-    function! self.configure.execute(self) abort
+    function! s:configure_tabular() abort
     endfunction
 
     return self
 endfunction
 
-call add(s:plugin_obj_list, s:tabular_class('tabular'))
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
 " vim-markdown {
-function! s:vim_markdown_class(name)
+let s:plugin_name = 'vim-markdown'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
     let self = s:base_class(a:name)
     let self.base = deepcopy(self)
 
-    function! self.initialize.key_mapping() abort
+    function! self.initialize.mapping_key() abort
+    endfunction
+
+    function! self.initialize.difine_command() abort
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -1017,21 +1089,27 @@ function! s:vim_markdown_class(name)
             \ })
     endfunction
 
-    function! self.configure.execute(self) abort
+    function! s:configure_vim_markdown() abort
         let g:vim_markdown_folding_disabled = 1
     endfunction
 
     return self
 endfunction
 
-call add(s:plugin_obj_list, s:vim_markdown_class('vim-markdown'))
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
 " jedi-vim {
-function! s:jedi_vim_class(name)
+let s:plugin_name = 'jedi-vim'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
     let self = s:base_class(a:name)
     let self.base = deepcopy(self)
 
-    function! self.initialize.key_mapping() abort
+    function! self.initialize.mapping_key() abort
+    endfunction
+
+    function! self.initialize.difine_command() abort
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -1048,7 +1126,7 @@ function! s:jedi_vim_class(name)
             \ })
     endfunction
 
-    function! self.configure.execute(self) abort
+    function! s:configure_jedi_vim() abort
         " quickrunと被るため大文字に変更
         let g:jedi#rename_command = '<Leader>R'
         let g:jedi#goto_assignments_command = '<Leader>G'
@@ -1075,14 +1153,20 @@ function! s:jedi_vim_class(name)
     return self
 endfunction
 
-call add(s:plugin_obj_list, s:jedi_vim_class('jedi-vim'))
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
 " vim-virtualenv {
-function! s:vim_virtualenv_class(name)
+let s:plugin_name = 'vim-virtualenv'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
     let self = s:base_class(a:name)
     let self.base = deepcopy(self)
 
-    function! self.initialize.key_mapping() abort
+    function! self.initialize.mapping_key() abort
+    endfunction
+
+    function! self.initialize.difine_command() abort
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -1099,20 +1183,26 @@ function! s:vim_virtualenv_class(name)
             \ })
     endfunction
 
-    function! self.configure.execute(self) abort
+    function! s:configure_vim_virtualenv() abort
     endfunction
 
     return self
 endfunction
 
-call add(s:plugin_obj_list, s:vim_virtualenv_class('vim-virtualenv'))
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
 " vim-django-support {
-function! s:vim_django_support_class(name)
+let s:plugin_name = 'vim-django-support'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
     let self = s:base_class(a:name)
     let self.base = deepcopy(self)
 
-    function! self.initialize.key_mapping() abort
+    function! self.initialize.mapping_key() abort
+    endfunction
+
+    function! self.initialize.difine_command() abort
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -1129,20 +1219,26 @@ function! s:vim_django_support_class(name)
             \ })
     endfunction
 
-    function! self.configure.execute(self) abort
+    function! s:configure_vim_django_support() abort
     endfunction
 
     return self
 endfunction
 
-call add(s:plugin_obj_list, s:vim_django_support_class('vim-django-support'))
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
 " emmet-vim {
-function! s:emmet_vim_class(name)
+let s:plugin_name = 'emmet-vim'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
     let self = s:base_class(a:name)
     let self.base = deepcopy(self)
 
-    function! self.initialize.key_mapping() abort
+    function! self.initialize.mapping_key() abort
+    endfunction
+
+    function! self.initialize.difine_command() abort
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -1168,7 +1264,7 @@ function! s:emmet_vim_class(name)
             \ })
     endfunction
 
-    function! self.configure.execute(self) abort
+    function! s:configure_emmet_vim() abort
         let g:use_emmet_complete_tag = 1
         let g:user_emmet_settings = {
             \   'variables': {
@@ -1183,14 +1279,15 @@ function! s:emmet_vim_class(name)
     return self
 endfunction
 
-call add(s:plugin_obj_list, s:emmet_vim_class('emmet-vim'))
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
 
 
 for s:plugin_obj in s:plugin_obj_list
     if neobundle#tap(s:get_class_name(s:plugin_obj))
         function! neobundle#tapped.hooks.on_source(bundle) abort
-            call s:configure(s:plugin_obj)
+            let plugin_noextention_name = s:get_noextention_name(a:bundle.name)
+            call s:configure_{plugin_noextention_name}()
         endfunction
 
         call s:initialize(s:plugin_obj)
