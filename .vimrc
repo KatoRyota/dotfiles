@@ -319,6 +319,69 @@
     " }
 " }
 
+function! s:plugin_constants()
+    let self = {}
+    let self.data = {
+        \   'jellybeans' : ['NeoBundle', 'nanotech/jellybeans.vim'],
+        \ }
+
+    return self
+endfunction
+
+function! s:plugin_installer()
+    let self = {}
+
+    function! self.pre_install() abort
+        " Note: Skip initialization for vim-tiny or vim-small.
+        if 0 | endif
+        if has('vim_starting')
+            if &compatible
+                set nocompatible               " Be iMproved
+            endif
+            " neobundle をインストールしていない場合は自動インストール
+            if !isdirectory(expand("~/.vim/bundle/neobundle.vim/"))
+                echo "install neobundle..."
+                " vim からコマンド呼び出しているだけ neobundle.vim のクローン
+                call system("git clone https://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim")
+            endif
+            " runtimepath の追加は必須
+            set runtimepath+=~/.vim/bundle/neobundle.vim/
+        endif
+        " Use git protocol.
+        " let g:neobundle#types#git#default_protocol = 'git'
+        call neobundle#begin(expand('~/.vim/bundle'))
+    endfunction
+
+    function! self.install() abort
+        for key in keys(s:plugin_constants().data)
+            if s:plugin_constants().data[key][0] == 'NeoBundleLazy'
+                NeoBundleLazy s:plugin_constants().data[key][1] get(s:, 'plugin_constants().data[key][2]', {})
+            elseif s:plugin_constants().data[key][0] == 'NeoBundleFetch'
+                NeoBundleFetch s:plugin_constants().data[key][1] get(s:, 'plugin_constants().data[key][2]', {})
+            else s:plugin_constants().data[key][0] == 'NeoBundle'
+                NeoBundle s:plugin_constants().data[key][1] get(s:, 'plugin_constants().data[key][2]', {})
+            endif
+        endfor
+    endfunction
+
+    function! self.post_install() abort
+        call neobundle#end()
+        filetype plugin indent on       " Required!
+        NeoBundleCheck
+    endfunction
+
+    function! self.execute() abort
+        call self.pre_install()
+        call self.install()
+        call self.post_install()
+    endfunction
+
+    return self
+endfunction
+
+"TODO : 実装が完了したらコメントを外す
+"call s:plugin_installer().execute()
+
 function! s:base_class(name)
     let self = {}
 
@@ -473,7 +536,7 @@ function! s:{s:plugin_noextention_name}(name)
             let search_path = a:directory . '/**/' . extension
         endif
 
-        execute ':Unite -buffer-name=unite_vimgrep -no-quit -keep-focus -winheight=8 vimgrep:' . search_path . ':' . a:pattern
+        execute ':Unite -buffer-name=unite_vimgrep -no-quit -keep-focus -winheight=8 vimgrep:' . search_path . ':' . substitute(a:pattern, '\ ', '\\ ', 'g')
     endfunction
 
     function! s:unite_find(...) abort
@@ -484,7 +547,7 @@ function! s:{s:plugin_noextention_name}(name)
             let option = ''
         endif
 
-        execute ':Unite -buffer-name=unite_find -no-quit -keep-focus -winheight=8 find:' . getcwd() . ':' . option
+        execute ':Unite -buffer-name=unite_find -no-quit -keep-focus -winheight=8 find:' . getcwd() . ':' . substitute(option, '\ ', '\\ ', 'g')
     endfunction
 
     function! self.initialize.difine_command() abort
