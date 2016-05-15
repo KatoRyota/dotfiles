@@ -111,7 +111,7 @@
         " カーソル行をハイライト
         set cursorline
         " n列目に色を付ける
-        set colorcolumn=100
+        set colorcolumn=120
         " "0"で始まる数値を、8進数として扱わないようにする
         set nrformats-=octal
     " }
@@ -215,18 +215,16 @@
         command! -bar ClearUndo call s:clear_undo()
     " }
     " ファイルタイプ 判定 {
-        "autocmd BufRead,BufNewFile,SessionLoadPost *.py setfiletype python
-        autocmd BufReadPost,FileReadPost *.py set filetype=python
-        autocmd BufRead,BufNewFile,SessionLoadPost *.php setfiletype php
-        autocmd BufRead,BufNewFile,SessionLoadPost *.tpl setfiletype smarty
-        autocmd BufRead,BufNewFile,SessionLoadPost *.phtml setfiletype smarty
-        autocmd BufRead,BufNewFile,SessionLoadPost *.html setfiletype html
-        autocmd BufRead,BufNewFile,SessionLoadPost *.java setfiletype java
-        autocmd BufRead,BufNewFile,SessionLoadPost *.jsp setfiletype jsp
-        autocmd BufRead,BufNewFile,SessionLoadPost *.inc setfiletype jsp
-        "autocmd BufRead,BufNewFile,SessionLoadPost *.md setfiletype markdown
-        autocmd BufReadPost,FileReadPost *.md set filetype=markdown
-        autocmd BufRead,BufNewFile,SessionLoadPost *.vimrc setfiletype vim
+        autocmd BufReadPost,FileReadPost *.py    setfiletype python
+        autocmd BufReadPost,FileReadPost *.php   setfiletype php
+        autocmd BufReadPost,FileReadPost *.tpl   setfiletype smarty
+        autocmd BufReadPost,FileReadPost *.phtml setfiletype smarty
+        autocmd BufReadPost,FileReadPost *.html  setfiletype html
+        autocmd BufReadPost,FileReadPost *.java  setfiletype java
+        autocmd BufReadPost,FileReadPost *.jsp   setfiletype jsp
+        autocmd BufReadPost,FileReadPost *.inc   setfiletype jsp
+        autocmd BufReadPost,FileReadPost *.md    setfiletype markdown
+        autocmd BufReadPost,FileReadPost *.vimrc setfiletype vim
     " }
     " 対応する括弧 for matchit.zip {{{
         function! s:set_match_words()
@@ -241,11 +239,10 @@
                                 \ &matchpairs . ","
         endfunction
 
-        "autocmd BufWinEnter,SessionLoadPost * call s:set_match_words()
         autocmd BufReadPost,FileReadPost * call s:set_match_words()
     " }}}
     " ウィンドウ {
-        nnoremap ,wa <C-w>h <C-w>h <C-w>h 45<C-w>\| <C-w>l 120<C-w>\| <C-w>l 34<C-w>\|
+        nnoremap ,wa <ESC><ESC> <C-w>h <C-w>h <C-w>h <C-w>l 100<C-w>\| <C-w>h 45<C-w>\| <C-w>l <C-w>l 34<C-w>\|
     " }
 " }
 " プラグイン {
@@ -292,6 +289,7 @@
         NeoBundleLazy 'tpope/vim-surround'
         NeoBundleLazy 'vim-scripts/matchit.zip'
         "NeoBundleLazy 'scrooloose/syntastic'
+        NeoBundle 'osyo-manga/vim-brightest'
 
         "for markdown
         NeoBundleLazy 'godlygeek/tabular'
@@ -503,7 +501,7 @@ function! s:{s:plugin_noextention_name}(name)
         "nnoremap ,t :<C-u>Unite -buffer-name=unite_buffer_tab -no-quit -keep-focus -winheight=8 tab<CR>
         "nnoremap ,y :<C-u>Unite -buffer-name=unite_buffer_tab -no-quit -keep-focus -winheight=8 buffer_tab<CR>
         "nnoremap ,i :<C-u>Unite -buffer-name=unite_file -no-quit -keep-focus -winheight=8 file<CR>
-        nnoremap ,l :<C-u>UniteWithBufferDir -buffer-name=unite_with_buffer_dir_file -no-quit -keep-focus -winheight=8 file<CR>
+        nnoremap ,c :<C-u>UniteWithBufferDir -buffer-name=unite_with_buffer_dir_file -no-quit -keep-focus -winheight=8 file<CR>
         nnoremap ,m :<C-u>Unite -buffer-name=unite_file_mru -no-quit -keep-focus -winheight=8 file_mru<CR>
         nnoremap ,r :<C-u>Unite -buffer-name=unite_register -no-quit -keep-focus -winheight=8 register<CR>
         "nnoremap ,o :<C-u>Unite -buffer-name=unite_outline -no-quit -keep-focus -no-truncate -vertical -create -winwidth=42 outline<CR>
@@ -511,6 +509,7 @@ function! s:{s:plugin_noextention_name}(name)
         "nnoremap ,g :execute ':Unite -buffer-name=unite_grep -no-quit -keep-focus -winheight=8 grep:' . getcwd() . '::'<Left>
         nnoremap ,v :<C-u>UniteVimGrep<Space>
         nnoremap ,f :<C-u>UniteFind<Space>
+        nnoremap ,l :<C-u>UniteFileRecAsync<Space>
 
         "nnoremap ,ug :<C-u>UniteResume -no-quit -keep-focus unite_grep<CR>
         nnoremap ,uv :<C-u>UniteResume -no-quit -keep-focus -winheight=8 unite_vimgrep<CR>
@@ -519,6 +518,8 @@ function! s:{s:plugin_noextention_name}(name)
         nnoremap ,] :<C-u>UniteWithCursorWord -no-quit -keep-focus -winheight=8 -immediately tag<CR>
         nnoremap ,t :<C-u>Unite jump<CR>
     endfunction
+
+
 
     function! s:unite_vimgrep(pattern, directory, ...) abort
         "a:1 == extension (example : *.py)
@@ -536,23 +537,34 @@ function! s:{s:plugin_noextention_name}(name)
             let search_path = a:directory . '/**/' . extension
         endif
 
-        execute ':Unite -buffer-name=unite_vimgrep -no-quit -keep-focus -winheight=8 vimgrep:' . search_path . ':' . substitute(a:pattern, '\ ', '\\ ', 'g')
+        let pattern = substitute(a:pattern, ' ', '\\ ', 'g')
+        let pattern = substitute(pattern, '\', '\\\', 'g')
+
+        execute ':Unite -buffer-name=unite_vimgrep -no-quit -keep-focus -winheight=8 vimgrep:' . search_path . ':' . pattern
     endfunction
 
-    function! s:unite_find(...) abort
-        "a:1 == ${find option}
-        if exists('a:1')
-            let option = a:1
+    function! s:unite_find(file_name) abort
+        if !exists('a:file_name')
+            throw '引数にfile_nameが指定されていません。'
         else
-            let option = ''
+            let option = '-iname ' . '''' . a:file_name . ''''
         endif
 
         execute ':Unite -buffer-name=unite_find -no-quit -keep-focus -winheight=8 find:' . getcwd() . ':' . substitute(option, '\ ', '\\ ', 'g')
     endfunction
 
+    function! s:unite_file_rec_async(path) abort
+        if !exists('a:path')
+            throw '引数にpathが指定されていません。'
+        endif
+
+        execute 'Unite -buffer-name=unite_file_rec_async -no-quit -keep-focus -winheight=8 file_rec/async:' . substitute(a:path, '\ ', '\\ ', 'g')
+    endfunction
+
     function! self.initialize.difine_command() abort
         command! -bar -nargs=+ UniteVimGrep call s:unite_vimgrep(<f-args>)
         command! -bar -nargs=1 UniteFind call s:unite_find(<f-args>)
+        command! -bar -nargs=1 UniteFileRecAsync call s:unite_file_rec_async(<f-args>)
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -577,8 +589,10 @@ function! s:{s:plugin_noextention_name}(name)
         let g:unite_source_file_mru_long_limit = 6000
         let g:unite_source_file_mru_limit = 300
         let g:unite_source_directory_mru_long_limit = 6000
+        let g:neomru#time_format = "(%Y/%m/%d %H:%M:%S) "
         " let g:unite_prompt = '❯ '
         call unite#custom_source('buffer', 'sorters', 'sorter_word')
+        call unite#custom_source('file_mru', 'sorters', 'sorter_nothing')
     endfunction
 
     return self
@@ -971,6 +985,53 @@ endfunction
 
 call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
 " }
+" vim-brightest {{{
+let s:plugin_name = 'vim-brightest'
+let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+
+function! s:{s:plugin_noextention_name}(name)
+    let self = s:base_class(a:name)
+    let self.base = deepcopy(self)
+
+    function! self.initialize.mapping_key() abort
+    endfunction
+
+    function! self.initialize.difine_command() abort
+    endfunction
+
+    function! self.initialize.execute(self) abort
+        call call(a:self.base.initialize.execute, [], self)
+
+
+        let g:brightest#pattern = '\k\+'
+
+        " filetype=vim のみを有効にする
+        let g:brightest#enable_filetypes = {
+                \   "_"   : 0,
+                \   "vim" : 1,
+                \   "java" : 1,
+                \   "python" : 1,
+                \   "javascript" : 1,
+                \   "bash" : 1,
+                \   "sh" : 1,
+                \   "php" : 1,
+                \   "html" : 1,
+                \   "jsp" : 1,
+                \ }
+
+        let g:brightest#highlight = {
+                \   "group" : "Search",
+                \ }
+    endfunction
+
+    function! s:configure_matchit() abort
+    endfunction
+
+    return self
+endfunction
+
+call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
+" }}}
 " vim-surround {
 let s:plugin_name = 'vim-surround'
 let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
