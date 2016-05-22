@@ -213,6 +213,7 @@
         endfunction
 
         command! -bar ClearUndo call s:clear_undo()
+        nnoremap <Space>cu :<C-u>ClearUndo<CR>
     " }
     " ファイルタイプ 判定 {
         autocmd BufReadPost,FileReadPost *.py    setfiletype python
