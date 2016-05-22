@@ -242,7 +242,7 @@
         autocmd BufReadPost,FileReadPost * call s:set_match_words()
     " }}}
     " ウィンドウ {
-        nnoremap ,wa <ESC><ESC> <C-w>h <C-w>h <C-w>h <C-w>l 100<C-w>\| <C-w>h 45<C-w>\| <C-w>l <C-w>l 34<C-w>\|
+        nnoremap ,wa <ESC><ESC> <C-w>h <C-w>h <C-w>h <C-w>l 100<C-w>\| <C-w>h 45<C-w>\| <C-w>l <C-w>l 34<C-w>\| <C-w>h
     " }
 " }
 " プラグイン {
@@ -497,73 +497,84 @@ function! s:{s:plugin_noextention_name}(name)
     let self.base = deepcopy(self)
 
     function! self.initialize.mapping_key() abort
-        nnoremap ,b :<C-u>Unite -buffer-name=unite_buffer -no-quit -keep-focus -winheight=8 buffer<CR>
-        "nnoremap ,t :<C-u>Unite -buffer-name=unite_buffer_tab -no-quit -keep-focus -winheight=8 tab<CR>
-        "nnoremap ,y :<C-u>Unite -buffer-name=unite_buffer_tab -no-quit -keep-focus -winheight=8 buffer_tab<CR>
-        "nnoremap ,i :<C-u>Unite -buffer-name=unite_file -no-quit -keep-focus -winheight=8 file<CR>
-        nnoremap ,c :<C-u>UniteWithBufferDir -buffer-name=unite_with_buffer_dir_file -no-quit -keep-focus -winheight=8 file<CR>
-        nnoremap ,m :<C-u>Unite -buffer-name=unite_file_mru -no-quit -keep-focus -winheight=8 file_mru<CR>
-        nnoremap ,r :<C-u>Unite -buffer-name=unite_register -no-quit -keep-focus -winheight=8 register<CR>
-        "nnoremap ,o :<C-u>Unite -buffer-name=unite_outline -no-quit -keep-focus -no-truncate -vertical -create -winwidth=42 outline<CR>
+        nnoremap ,b :<C-u>Unite buffer<CR>
+        nnoremap ,m :<C-u>Unite file_mru<CR>
 
-        "nnoremap ,g :execute ':Unite -buffer-name=unite_grep -no-quit -keep-focus -winheight=8 grep:' . getcwd() . '::'<Left>
+        nnoremap ,r :<C-u>Unite register<CR>
+        nnoremap ,y :<C-u>Unite history/yank<CR>
+
+        nnoremap ,lc :<C-u>UniteWithBufferDir file<CR>
+        nnoremap ,lf :<C-u>Unite file:
+        nnoremap ,lr :<C-u>Unite file_rec/async:
+
         nnoremap ,v :<C-u>UniteVimGrep<Space>
         nnoremap ,f :<C-u>UniteFind<Space>
-        nnoremap ,l :<C-u>UniteFileRecAsync<Space>
 
-        "nnoremap ,ug :<C-u>UniteResume -no-quit -keep-focus unite_grep<CR>
-        nnoremap ,uv :<C-u>UniteResume -no-quit -keep-focus -winheight=8 unite_vimgrep<CR>
-        nnoremap ,uf :<C-u>UniteResume -no-quit -keep-focus -winheight=8 unite_find<CR>
+        nnoremap ,av :<C-u>UniteResume unite_vimgrep<CR>
+        nnoremap ,af :<C-u>UniteResume unite_find<CR>
 
-        nnoremap ,] :<C-u>UniteWithCursorWord -no-quit -keep-focus -winheight=8 -immediately tag<CR>
+        nnoremap ,] :<C-u>UniteWithCursorWord -immediately tag<CR>
         nnoremap ,t :<C-u>Unite jump<CR>
     endfunction
 
 
 
     function! s:unite_vimgrep(pattern, directory, ...) abort
-        "a:1 == extension (example : *.py)
+        "a:1には拡張子を指定すること (例: *.py)
         if exists('a:1')
             let extension = a:1
+
         else
             let extension = '*'
         endif
 
         if a:directory == '%'
             let search_path = '%'
+
         elseif a:directory == '.'
             let search_path = getcwd() . '/**/' . extension
+
         else
             let search_path = a:directory . '/**/' . extension
+
         endif
 
-        let pattern = substitute(a:pattern, ' ', '\\ ', 'g')
+        let pattern = substitute(a:pattern, '\ ', '\\ ', 'g')
         let pattern = substitute(pattern, '\', '\\\', 'g')
 
-        execute ':Unite -buffer-name=unite_vimgrep -no-quit -keep-focus -winheight=8 vimgrep:' . search_path . ':' . pattern
+        execute 'Unite -buffer-name=unite_vimgrep vimgrep:' . search_path . ':' . pattern
     endfunction
 
     function! s:unite_find(file_name) abort
         if !exists('a:file_name')
             throw '引数にfile_nameが指定されていません。'
-        else
-            let option = '-iname ' . '''' . a:file_name . ''''
         endif
 
-        execute ':Unite -buffer-name=unite_find -no-quit -keep-focus -winheight=8 find:' . getcwd() . ':' . substitute(option, '\ ', '\\ ', 'g')
+        let file_name = '-iname ' . '''' . a:file_name . ''''
+
+        execute 'Unite -buffer-name=unite_find find:' . getcwd() . ':' . substitute(file_name, '\ ', '\\ ', 'g')
     endfunction
 
-    function! s:unite_file_rec_async(path) abort
-        if !exists('a:path')
-            throw '引数にpathが指定されていません。'
+    function! s:unite_file(file_path) abort
+        if !exists('a:file_path')
+            throw '引数にfile_pathが指定されていません。'
         endif
 
-        execute 'Unite -buffer-name=unite_file_rec_async -no-quit -keep-focus -winheight=8 file_rec/async:' . substitute(a:path, '\ ', '\\ ', 'g')
+        execute 'Unite file:' . substitute(a:file_path, '\ ', '\\ ', 'g')
+    endfunction
+
+    function! s:unite_file_rec_async(dir_path) abort
+        if !exists('a:dir_path')
+            throw '引数にdir_pathが指定されていません。'
+        endif
+
+        execute 'Unite file_rec/async:' . substitute(a:dir_path, '\ ', '\\ ', 'g')
     endfunction
 
     function! self.initialize.difine_command() abort
         command! -bar -nargs=+ UniteVimGrep call s:unite_vimgrep(<f-args>)
         command! -bar -nargs=1 UniteFind call s:unite_find(<f-args>)
+        command! -bar -nargs=1 UniteFile call s:unite_file(<f-args>)
         command! -bar -nargs=1 UniteFileRecAsync call s:unite_file_rec_async(<f-args>)
     endfunction
 
@@ -582,17 +593,20 @@ function! s:{s:plugin_noextention_name}(name)
     endfunction
 
     function! s:configure_unite() abort
-        let g:unite_kind_jump_list_after_jump_scroll=0
+        "let g:unite_source_file_mru_long_limit = 6000
+        "let g:unite_source_file_mru_limit = 300
+        "let g:unite_source_directory_mru_long_limit = 6000
+        "let g:unite_prompt = '❯ '
+        "let g:unite_kind_jump_list_after_jump_scroll=0
+        "let g:unite_source_rec_min_cache_files = 1000
+        "let g:unite_source_rec_max_cache_files = 5000
+
         let g:unite_enable_start_insert = 0
-        let g:unite_source_rec_min_cache_files = 1000
-        let g:unite_source_rec_max_cache_files = 5000
-        let g:unite_source_file_mru_long_limit = 6000
-        let g:unite_source_file_mru_limit = 300
-        let g:unite_source_directory_mru_long_limit = 6000
+        let g:unite_source_history_yank_enable = 1
         let g:neomru#time_format = "(%Y/%m/%d %H:%M:%S) "
-        " let g:unite_prompt = '❯ '
+
         call unite#custom_source('buffer', 'sorters', 'sorter_word')
-        call unite#custom_source('file_mru', 'sorters', 'sorter_nothing')
+        call unite#custom_source('file_mru', 'sorters', 'sorter_default')
     endfunction
 
     return self
@@ -1007,7 +1021,7 @@ function! s:{s:plugin_noextention_name}(name)
 
         " filetype=vim のみを有効にする
         let g:brightest#enable_filetypes = {
-                \   "_"   : 0,
+                \   "_"   : 1,
                 \   "vim" : 1,
                 \   "java" : 1,
                 \   "python" : 1,
@@ -1024,7 +1038,7 @@ function! s:{s:plugin_noextention_name}(name)
                 \ }
     endfunction
 
-    function! s:configure_matchit() abort
+    function! s:configure_vim_brightest() abort
     endfunction
 
     return self
@@ -1215,6 +1229,17 @@ function! s:{s:plugin_noextention_name}(name)
 
     function! s:configure_vim_markdown() abort
         let g:vim_markdown_folding_disabled = 1
+
+        let g:vim_markdown_fenced_languages = [
+            \   'csharp=cs',
+            \   'java',
+            \   'php',
+            \   'python',
+            \   'ruby',
+            \   'html',
+            \   'vim',
+            \   'sh',
+            \ ]
     endfunction
 
     return self
