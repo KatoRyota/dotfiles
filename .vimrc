@@ -243,7 +243,7 @@
         autocmd BufReadPost,FileReadPost * call s:set_match_words()
     " }}}
     " ウィンドウ {
-        nnoremap ,wa <ESC><ESC> <C-w>h <C-w>h <C-w>h <C-w>l 100<C-w>\| <C-w>h 45<C-w>\| <C-w>l <C-w>l 34<C-w>\| <C-w>h
+        nnoremap <Space>wr <ESC><ESC> <C-w>h <C-w>h <C-w>h <C-w>l 100<C-w>\| <C-w>h 45<C-w>\| <C-w>l <C-w>l 34<C-w>\| <C-w>h
     " }
 " }
 " プラグイン {
@@ -500,6 +500,7 @@ function! s:{s:plugin_noextention_name}(name)
     function! self.initialize.mapping_key() abort
         nnoremap ,b :<C-u>Unite buffer<CR>
         nnoremap ,m :<C-u>Unite file_mru<CR>
+        nnoremap ,k :<C-u>Unite mapping<CR>
 
         nnoremap ,r :<C-u>Unite register<CR>
         nnoremap ,y :<C-u>Unite history/yank<CR>
@@ -1009,6 +1010,7 @@ function! s:{s:plugin_noextention_name}(name)
     let self.base = deepcopy(self)
 
     function! self.initialize.mapping_key() abort
+        nnoremap <Space>b :<C-u>BrightestToggle<CR>
     endfunction
 
     function! self.initialize.difine_command() abort
