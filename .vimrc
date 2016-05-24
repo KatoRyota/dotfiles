@@ -930,7 +930,8 @@ function! s:{s:plugin_noextention_name}(name)
 
     function! self.initialize.mapping_key() abort
         "nnoremap <Leader>e :VimFiler -buffer-name=explorer -no-quit -split -winwidth=90 -simple -toggle<CR>
-        nnoremap <Leader>e :<C-u>VimFilerExplore -winwidth=45 -winminwidth=45 -fnamewidth=45<CR>
+        nnoremap <Leader>e :<C-u>VimFilerExplore<CR>
+        nnoremap <Leader>s :<C-u>VimFilerCurrentDir -explorer -find<CR>
     endfunction
 
     function! self.initialize.difine_command() abort
