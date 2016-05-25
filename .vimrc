@@ -79,7 +79,7 @@
     " }
     " コマンドライン {
         " コマンドラインの高さ (gvimはgvimrcで指定)
-        set cmdheight=3
+        set cmdheight=2
     " }
     " スクロール {
         " 左右スクロール時の視界を確保
@@ -512,8 +512,10 @@ function! s:{s:plugin_noextention_name}(name)
         nnoremap ,v :<C-u>UniteVimGrep<Space>
         nnoremap ,f :<C-u>UniteFind<Space>
 
-        nnoremap ,av :<C-u>UniteResume unite_vimgrep<CR>
-        nnoremap ,af :<C-u>UniteResume unite_find<CR>
+        nnoremap ,,v :<C-u>UniteResume unite_vimgrep<CR>
+        nnoremap ,,f :<C-u>UniteResume unite_find<CR>
+
+        nnoremap ,,b :<C-u>Unite Bookmark<CR>
 
         nnoremap ,] :<C-u>UniteWithCursorWord -immediately tag<CR>
         nnoremap ,t :<C-u>Unite jump<CR>
@@ -930,8 +932,8 @@ function! s:{s:plugin_noextention_name}(name)
 
     function! self.initialize.mapping_key() abort
         "nnoremap <Leader>e :VimFiler -buffer-name=explorer -no-quit -split -winwidth=90 -simple -toggle<CR>
-        nnoremap <Leader>e :<C-u>VimFilerExplore<CR>
-        nnoremap <Leader>f :<C-u>VimFilerCurrentDir -explorer -find<CR>
+        nnoremap <Leader>e :<C-u>VimFilerExplore -winwidth=45 -winminwidth=45<CR>
+        nnoremap <Leader>f :<C-u>VimFilerCurrentDir -fnamewidth=45 -explorer -find<CR>
     endfunction
 
     function! self.initialize.difine_command() abort
