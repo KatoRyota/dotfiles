@@ -243,7 +243,22 @@
         autocmd BufReadPost,FileReadPost * call s:set_match_words()
     " }}}
     " ウィンドウ {
-        nnoremap <Space>wr <ESC><ESC> <C-w>h <C-w>h <C-w>h <C-w>l 100<C-w>\| <C-w>h 45<C-w>\| <C-w>l <C-w>l 34<C-w>\| <C-w>h
+        nnoremap <Space>wr :<C-u>ResetWindow<CR>
+
+        function! s:reset_window() abort
+            execute '2wincmd w'
+            execute 'vertical resize 100'
+
+            execute '1wincmd w'
+            execute 'vertical resize 45'
+
+            execute '3wincmd w'
+            execute 'vertical resize 34'
+
+            execute '2wincmd w'
+        endfunction
+
+        command! -bar ResetWindow call s:reset_window()
     " }
 " }
 " プラグイン {
@@ -515,7 +530,7 @@ function! s:{s:plugin_noextention_name}(name)
         nnoremap ,,v :<C-u>UniteResume unite_vimgrep<CR>
         nnoremap ,,f :<C-u>UniteResume unite_find<CR>
 
-        nnoremap ,,b :<C-u>Unite Bookmark<CR>
+        nnoremap ,,b :<C-u>Unite bookmark<CR>
 
         nnoremap ,] :<C-u>UniteWithCursorWord -immediately tag<CR>
         nnoremap ,t :<C-u>Unite jump<CR>
@@ -559,27 +574,9 @@ function! s:{s:plugin_noextention_name}(name)
         execute 'Unite -buffer-name=unite_find find:' . getcwd() . ':' . substitute(file_name, '\ ', '\\ ', 'g')
     endfunction
 
-    function! s:unite_file(file_path) abort
-        if !exists('a:file_path')
-            throw '引数にfile_pathが指定されていません。'
-        endif
-
-        execute 'Unite file:' . substitute(a:file_path, '\ ', '\\ ', 'g')
-    endfunction
-
-    function! s:unite_file_rec_async(dir_path) abort
-        if !exists('a:dir_path')
-            throw '引数にdir_pathが指定されていません。'
-        endif
-
-        execute 'Unite file_rec/async:' . substitute(a:dir_path, '\ ', '\\ ', 'g')
-    endfunction
-
     function! self.initialize.difine_command() abort
         command! -bar -nargs=+ UniteVimGrep call s:unite_vimgrep(<f-args>)
         command! -bar -nargs=1 UniteFind call s:unite_find(<f-args>)
-        command! -bar -nargs=1 UniteFile call s:unite_file(<f-args>)
-        command! -bar -nargs=1 UniteFileRecAsync call s:unite_file_rec_async(<f-args>)
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -931,12 +928,17 @@ function! s:{s:plugin_noextention_name}(name)
     let self.base = deepcopy(self)
 
     function! self.initialize.mapping_key() abort
-        "nnoremap <Leader>e :VimFiler -buffer-name=explorer -no-quit -split -winwidth=90 -simple -toggle<CR>
         nnoremap <Leader>e :<C-u>VimFilerExplore -winwidth=45 -winminwidth=45<CR>
-        nnoremap <Leader>f :<C-u>VimFilerCurrentDir -fnamewidth=45 -explorer -find<CR>
+        nnoremap <Leader>f :<C-u>ExpandCurrentDir<CR>
+    endfunction
+
+    function! s:expand_current_dir() abort
+        execute 'VimFilerCurrentDir -winwidth=45 -winminwidth=45 -fnamewidth=45 -explorer -find'
+        execute '2wincmd w'
     endfunction
 
     function! self.initialize.difine_command() abort
+        command! -bar ExpandCurrentDir call s:expand_current_dir()
     endfunction
 
     function! self.initialize.execute(self) abort
