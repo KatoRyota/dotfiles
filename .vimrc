@@ -1247,6 +1247,7 @@ function! s:{s:plugin_noextention_name}(name)
             \   'html',
             \   'vim',
             \   'sh',
+            \   'text'
             \ ]
     endfunction
 
