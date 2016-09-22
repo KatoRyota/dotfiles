@@ -32,8 +32,10 @@
         " ビープ音抑止(gvimはgvimrcで指定)。前時代的スクリーンベルを無効化
         set t_vb=
         " コマンド、検索履歴数
-        set history=100
+        set history=10000
         set t_Co=256
+        set lazyredraw
+        set ttyfast
     " }
     " スワップファイル／バックアップファイル {
         " backupファイルを作らない。前時代的すぎなので無効化。
@@ -137,7 +139,7 @@
         " 置換の時 g オプションをデフォルトで有効
         " set gdefault
         " :grep(外部grep)の設定
-        set grepprg=grep\ -anHP\ --color=always\ --exclude\ *.class
+        set grepprg=grep\ -anHR\ --exclude-dir={.git,python2.6,perl-lib,target}\ --exclude={*.jpg,*.gif,*.png,*.tif,*.pdf,*.doc,*.docx,*.xls,*.xlsx,*.ppt,*.pptx,*.o,*.obj,*.pyc,*.so,*.class,*.jar,*.war,*.ear,*.dll,*.apk,*.asta,*.zip,*.rar,*.gz}
         " 内部grepの検索対象から除外
         set wildignore=*.jpg,*.gif,*.png,*.tif,
                       \*.pdf,
@@ -150,6 +152,7 @@
                       \*/python2.6/*,
                       \*/p_auth-api/bin/*,
                       \*/perl-lib/*,
+                      \*/target/*,
     " }
     " 折り畳み {
         " 折りたたみ方式
@@ -161,11 +164,11 @@
         " タブ入力を複数の空白入力に置き換える
         set expandtab
         " 画面上でタブ文字が占める幅
-        set tabstop=4
+        set tabstop=2
         " 自動インデントでずれる幅
-        set shiftwidth=4
+        set shiftwidth=2
         " 連続した空白に対してタブキーやバックスペースキーでカーソルが動く幅
-        set softtabstop=4
+        set softtabstop=2
         " 行頭の<Tab>は"shiftwidth"、それ以外は"tabstop"
         set smarttab
     " }
@@ -226,6 +229,7 @@
         autocmd BufReadPost,FileReadPost *.inc   setfiletype jsp
         autocmd BufReadPost,FileReadPost *.md    setfiletype markdown
         autocmd BufReadPost,FileReadPost *.vimrc setfiletype vim
+        autocmd BufReadPost,FileReadPost *.js    setfiletype javascript
     " }
     " 対応する括弧 for matchit.zip {{{
         function! s:set_match_words()
@@ -247,18 +251,21 @@
 
         function! s:reset_window() abort
             execute '2wincmd w'
-            execute 'vertical resize 100'
+            execute 'vertical resize 50'
 
             execute '1wincmd w'
             execute 'vertical resize 45'
 
             execute '3wincmd w'
-            execute 'vertical resize 34'
+            execute 'vertical resize 44'
 
             execute '2wincmd w'
         endfunction
 
         command! -bar ResetWindow call s:reset_window()
+    " }
+    " vimdiff {
+        set diffopt+=iwhite
     " }
 " }
 " プラグイン {
@@ -513,55 +520,80 @@ function! s:{s:plugin_noextention_name}(name)
     let self.base = deepcopy(self)
 
     function! self.initialize.mapping_key() abort
-        nnoremap ,b :<C-u>Unite buffer<CR>
-        nnoremap ,m :<C-u>Unite file_mru<CR>
-        nnoremap ,k :<C-u>Unite mapping<CR>
+        nnoremap ,b :<C-u>Unite buffer -buffer-name=unite_buffer<CR>
+        nnoremap ,m :<C-u>Unite file_mru -buffer-name=unite_file_mru<CR>
+        nnoremap ,k :<C-u>Unite mapping -buffer-name=unite_mapping<CR>
 
-        nnoremap ,r :<C-u>Unite register<CR>
-        nnoremap ,y :<C-u>Unite history/yank<CR>
+        nnoremap ,r :<C-u>Unite register -buffer-name=unite_register<CR>
+        nnoremap ,y :<C-u>Unite history/yank -buffer-name=unite_history_yank<CR>
 
         nnoremap ,lc :<C-u>UniteWithBufferDir file<CR>
         nnoremap ,lf :<C-u>Unite file:
         nnoremap ,lr :<C-u>Unite file_rec/async:
 
         nnoremap ,v :<C-u>UniteVimGrep<Space>
+        nnoremap ,g :<C-u>UniteGrep<Space>
         nnoremap ,f :<C-u>UniteFind<Space>
 
+        nnoremap ,,b :<C-u>UniteResume unite_buffer<CR>
         nnoremap ,,v :<C-u>UniteResume unite_vimgrep<CR>
+        nnoremap ,,g :<C-u>UniteResume unite_grep<CR>
         nnoremap ,,f :<C-u>UniteResume unite_find<CR>
-
-        nnoremap ,,b :<C-u>Unite bookmark<CR>
 
         nnoremap ,] :<C-u>UniteWithCursorWord -immediately tag<CR>
         nnoremap ,t :<C-u>Unite jump<CR>
     endfunction
 
-
-
     function! s:unite_vimgrep(pattern, directory, ...) abort
         "a:1には拡張子を指定すること (例: *.py)
         if exists('a:1')
             let extension = a:1
-
         else
             let extension = '*'
         endif
 
         if a:directory == '%'
             let search_path = '%'
-
         elseif a:directory == '.'
             let search_path = getcwd() . '/**/' . extension
-
         else
             let search_path = a:directory . '/**/' . extension
-
         endif
 
-        let pattern = substitute(a:pattern, '\ ', '\\ ', 'g')
-        let pattern = substitute(pattern, '\', '\\\', 'g')
+        echomsg a:pattern
+        let pattern = substitute(a:pattern, ' ', '\\ ', 'g')
+        echomsg pattern
+        let pattern = substitute(pattern, '\\', '\\\\', 'g')
+        echomsg pattern
 
+        echomsg 'Unite -buffer-name=unite_vimgrep vimgrep:' . search_path . ':' . pattern
         execute 'Unite -buffer-name=unite_vimgrep vimgrep:' . search_path . ':' . pattern
+    endfunction
+
+    function! s:unite_grep(pattern, directory, ...) abort
+        "a:1にはオプションを指定すること (例: -i)
+        if exists('a:1')
+            let option = a:1
+        else
+            let option = ''
+        endif
+
+        if a:directory == '%'
+            let search_path = '%'
+        elseif a:directory == '.'
+            let search_path = getcwd()
+        else
+            let search_path = a:directory
+        endif
+
+        echomsg a:pattern
+        let pattern = substitute(a:pattern, ' ', '\\ ', 'g')
+        echomsg pattern
+        let pattern = substitute(pattern, '\\', '\\\\', 'g')
+        echomsg pattern
+
+        echomsg 'Unite -buffer-name=unite_grep grep:' . search_path . ':' . option . ':' . pattern
+        execute 'Unite -buffer-name=unite_grep grep:' . search_path . ':' . option . ':' . pattern
     endfunction
 
     function! s:unite_find(file_name) abort
@@ -571,11 +603,13 @@ function! s:{s:plugin_noextention_name}(name)
 
         let file_name = '-iname ' . '''' . a:file_name . ''''
 
+        echomsg 'Unite -buffer-name=unite_find find:' . getcwd() . ':' . substitute(file_name, '\ ', '\\ ', 'g')
         execute 'Unite -buffer-name=unite_find find:' . getcwd() . ':' . substitute(file_name, '\ ', '\\ ', 'g')
     endfunction
 
     function! self.initialize.difine_command() abort
         command! -bar -nargs=+ UniteVimGrep call s:unite_vimgrep(<f-args>)
+        command! -bar -nargs=+ UniteGrep call s:unite_grep(<f-args>)
         command! -bar -nargs=1 UniteFind call s:unite_find(<f-args>)
     endfunction
 
@@ -606,6 +640,12 @@ function! s:{s:plugin_noextention_name}(name)
         let g:unite_source_history_yank_enable = 1
         let g:neomru#time_format = "(%Y/%m/%d %H:%M:%S) "
 
+        let g:unite_source_grep_command = 'grep'
+        let g:unite_source_grep_default_opts = '-anHR --exclude-dir={.git,python2.6,perl-lib,target} --exclude={*.jpg,*.gif,*.png,*.tif,*.pdf,*.doc,*.docx,*.xls,*.xlsx,*.ppt,*.pptx,*.o,*.obj,*.pyc,*.so,*.class,*.jar,*.war,*.ear,*.dll,*.apk,*.asta,*.zip,*.rar,*.gz}'
+        let g:unite_source_grep_recursive_opt = ''
+        "let g:unite_source_grep_max_candidates = 0
+
+        call unite#custom_max_candidates('vimgrep,grep,find', 0)
         call unite#custom_source('buffer', 'sorters', 'sorter_word')
         call unite#custom_source('file_mru', 'sorters', 'sorter_default')
     endfunction
@@ -614,7 +654,9 @@ function! s:{s:plugin_noextention_name}(name)
 endfunction
 
 call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }
+" } unite.vim
+
+
 " neomru {
 let s:plugin_name = 'neomru.vim'
 let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
@@ -692,6 +734,7 @@ function! s:{s:plugin_noextention_name}(name)
     let self.base = deepcopy(self)
 
     function! self.initialize.mapping_key() abort
+      nnoremap ,o :<C-u>Unite outline<CR>
     endfunction
 
     function! self.initialize.difine_command() abort
@@ -928,17 +971,29 @@ function! s:{s:plugin_noextention_name}(name)
     let self.base = deepcopy(self)
 
     function! self.initialize.mapping_key() abort
-        nnoremap <Leader>e :<C-u>VimFilerExplore -winwidth=45 -winminwidth=45<CR>
-        nnoremap <Leader>f :<C-u>ExpandCurrentDir<CR>
+      nnoremap <Leader>e :<C-u>OpenFileExplore<CR>
+      nnoremap <Leader>f :<C-u>ExpandCurrentDir<CR>
+    endfunction
+
+    function! s:open_file_explore() abort
+      execute 'VimFilerExplore -winwidth=45 -winminwidth=45 -fnamewidth=45 -no-focus'
+
+      if winnr('$') == 3
+        call s:reset_window()
+      endif
     endfunction
 
     function! s:expand_current_dir() abort
-        execute 'VimFilerCurrentDir -winwidth=45 -winminwidth=45 -fnamewidth=45 -explorer -find'
-        execute '2wincmd w'
+      execute 'VimFilerCurrentDir -winwidth=45 -winminwidth=45 -fnamewidth=45 -no-focus -explorer -find'
+
+      if winnr('$') == 3
+        call s:reset_window()
+      endif
     endfunction
 
     function! self.initialize.difine_command() abort
-        command! -bar ExpandCurrentDir call s:expand_current_dir()
+      command! -bar OpenFileExplore call s:open_file_explore()
+      command! -bar ExpandCurrentDir call s:expand_current_dir()
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -1137,11 +1192,20 @@ function! s:{s:plugin_noextention_name}(name)
     let self.base = deepcopy(self)
 
     function! self.initialize.mapping_key() abort
-        nnoremap <Leader>t :<C-u>TagbarToggle<CR>
+        nnoremap <Leader>t :<C-u>OpenCloseTagbar<CR>
         nnoremap <Leader>s :<C-u>TagbarShowTag<CR>
     endfunction
 
+    function! s:open_tagbar() abort
+      execute 'TagbarToggle'
+
+      if winnr('$') == 3
+        call s:reset_window()
+      endif
+    endfunction
+
     function! self.initialize.difine_command() abort
+      command! -bar OpenCloseTagbar call s:open_tagbar()
     endfunction
 
     function! self.initialize.execute(self) abort
@@ -1157,7 +1221,8 @@ function! s:{s:plugin_noextention_name}(name)
     endfunction
 
     function! s:configure_tagbar() abort
-        let g:tagbar_width = 34
+        let g:tagbar_ctags_bin = '/usr/bin/ctags'
+        let g:tagbar_width = 44
         let g:tagbar_type_markdown = {
             \   'ctagstype': 'markdown',
             \   'ctagsbin' : expand('~/.vim/bundle/markdown2ctags/markdown2ctags.py'),
@@ -1171,6 +1236,16 @@ function! s:{s:plugin_noextention_name}(name)
             \       's' : 'section',
             \   },
             \   'sort': 0,
+            \ }
+
+        let g:tagbar_type_javascript = {
+            \ 'ctagstype': 'js',
+            \ 'kinds': [
+                  \ 'a:array',
+                  \ 'o:object',
+                  \ 'r:var',
+                  \ 'f:function'
+              \ ]
             \ }
     endfunction
 

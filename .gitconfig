@@ -30,6 +30,9 @@
     dw = diff --word-diff
     dc = diff --cached
     wc = whatchanged
+[user]
+    name = kato_ryota
+    email = kato.ryota.0124@gmail.com
 [difftool]
     prompt = false
 [merge]
