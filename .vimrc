@@ -296,27 +296,28 @@
     " 一覧 {
         "for common
         NeoBundle 'nanotech/jellybeans.vim'
+        NeoBundle 'vim-scripts/matchit.zip'
         NeoBundle 'Shougo/vimproc.vim'
+        NeoBundle 'Shougo/neosnippet-snippets'
+        NeoBundle 'Shougo/tabpagebuffer.vim', {'depends' : ['Shougo/unite.vim']}
+
         NeoBundleLazy 'Shougo/unite.vim', {'depends' : ['Shougo/vimproc.vim']}
         NeoBundleLazy 'Shougo/neomru.vim', {'depends' : ['Shougo/unite.vim']}
-        NeoBundleLazy 'Shougo/tabpagebuffer.vim', {'depends' : ['Shougo/unite.vim']}
         NeoBundleLazy 'Shougo/unite-outline', {'depends' : ['Shougo/unite.vim']}
         NeoBundleLazy 'Shougo/vimfiler.vim', {'depends' : ["Shougo/unite.vim"]}
-        NeoBundleLazy 'Shougo/neosnippet-snippets'
         NeoBundleLazy 'Shougo/neosnippet.vim', {'depends' : ['Shougo/neocomplete.vim', 'Shougo/neosnippet-snippets'] }
         NeoBundleLazy 'Shougo/neocomplete.vim', {'depends' : ['Shougo/vimproc.vim']}
         NeoBundleLazy 'Shougo/vimshell.vim', {'depends' : ['Shougo/vimproc.vim']}
         NeoBundleLazy 'tsukkee/unite-tag'
         NeoBundleLazy 'majutsushi/tagbar'
         NeoBundleFetch 'jszakmeister/markdown2ctags'
-        NeoBundleLazy 'tpope/vim-surround'
-        NeoBundleLazy 'vim-scripts/matchit.zip'
+        NeoBundle 'tpope/vim-surround'
         "NeoBundleLazy 'scrooloose/syntastic'
         NeoBundle 'osyo-manga/vim-brightest'
 
         "for markdown
         NeoBundleLazy 'godlygeek/tabular'
-        NeoBundleLazy 'plasticboy/vim-markdown', {'depends' : ['godlygeek/tabular'] }
+        NeoBundle 'plasticboy/vim-markdown', {'depends' : ['godlygeek/tabular'] }
 
         "for python
         NeoBundleLazy 'davidhalter/jedi-vim'
@@ -328,234 +329,61 @@
         "NeoBundleLazy 'mattn/emmet-vim'
 
         "for css
-        NeoBundleLazy 'hail2u/vim-css3-syntax'
+        NeoBundle 'hail2u/vim-css3-syntax'
 
         "for javascript
-        NeoBundleLazy 'pangloss/vim-javascript'
-    " }
-    " 後処理 {
-        call neobundle#end()
-        filetype plugin indent on       " Required!
-        NeoBundleCheck
+        NeoBundle 'pangloss/vim-javascript'
     " }
 " }
 
-function! s:plugin_constants()
-    let self = {}
-    let self.data = {
-        \   'jellybeans' : ['NeoBundle', 'nanotech/jellybeans.vim'],
-        \ }
+" テンプレート/
+if neobundle#tap('')
+    call neobundle#untap()
+endif
+" /テンプレート
 
-    return self
-endfunction
+if neobundle#tap('vimproc.vim')
+    call neobundle#config({
+        \   'build': {'windows': 'tools\\update-dll-mingw', 'cygwin': 'make -f make_cygwin.mak', 'mac': 'make -f make_mac.mak',
+        \       'linux': 'make', 'unix': 'gmake'}
+        \ })
 
-function! s:plugin_installer()
-    let self = {}
+    call neobundle#untap()
+endif
 
-    function! self.pre_install() abort
-        " Note: Skip initialization for vim-tiny or vim-small.
-        if 0 | endif
-        if has('vim_starting')
-            if &compatible
-                set nocompatible               " Be iMproved
-            endif
-            " neobundle をインストールしていない場合は自動インストール
-            if !isdirectory(expand("~/.vim/bundle/neobundle.vim/"))
-                echo "install neobundle..."
-                " vim からコマンド呼び出しているだけ neobundle.vim のクローン
-                call system("git clone https://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim")
-            endif
-            " runtimepath の追加は必須
-            set runtimepath+=~/.vim/bundle/neobundle.vim/
-        endif
-        " Use git protocol.
-        " let g:neobundle#types#git#default_protocol = 'git'
-        call neobundle#begin(expand('~/.vim/bundle'))
-    endfunction
+if neobundle#tap('unite.vim')
+    call neobundle#config({
+        \   'autoload': {
+        \       'commands': ['Unite', 'UniteWithCursorWord', 'UniteWithInput']
+        \   }
+        \ })
 
-    function! self.install() abort
-        for key in keys(s:plugin_constants().data)
-            if s:plugin_constants().data[key][0] == 'NeoBundleLazy'
-                NeoBundleLazy s:plugin_constants().data[key][1] get(s:, 'plugin_constants().data[key][2]', {})
-            elseif s:plugin_constants().data[key][0] == 'NeoBundleFetch'
-                NeoBundleFetch s:plugin_constants().data[key][1] get(s:, 'plugin_constants().data[key][2]', {})
-            else s:plugin_constants().data[key][0] == 'NeoBundle'
-                NeoBundle s:plugin_constants().data[key][1] get(s:, 'plugin_constants().data[key][2]', {})
-            endif
-        endfor
-    endfunction
-
-    function! self.post_install() abort
-        call neobundle#end()
-        filetype plugin indent on       " Required!
-        NeoBundleCheck
-    endfunction
-
-    function! self.execute() abort
-        call self.pre_install()
-        call self.install()
-        call self.post_install()
-    endfunction
-
-    return self
-endfunction
-
-"TODO : 実装が完了したらコメントを外す
-"call s:plugin_installer().execute()
-
-function! s:base_class(name)
-    let self = {}
-
-    let self.name       = a:name
-    let self.initialize = {}
-
-    function! self.get_name()
-        return self.name
-    endfunction
-
-    function! self.initialize.mapping_key()
-    endfunction
-
-    function! self.initialize.difine_command()
-    endfunction
-
-    function! self.initialize.execute()
-        call self.mapping_key()
-        call self.difine_command()
-    endfunction
-
-    return self
-endfunction
-
-function! s:get_class_name(instance)
-    return a:instance.get_name()
-endfunction
-
-function! s:initialize(instance)
-    call a:instance.initialize.execute(a:instance)
-endfunction
-
-function! s:get_noextention_name(plugin_name)
-    let str = substitute(a:plugin_name, '\([^.]*\)\..*', '\1', 'g')
-    let str = substitute(str, '-', '_', 'g')
-    return str
-endfunction
-
-let s:plugin_obj_list = []
-
-"--------------------------------------------------
-" 下記のようにクラスを作成して『s:plugin_obj_list』に追加する。
-"--------------------------------------------------
-
-"let s:plugin_name = '${plugin_name}'
-"let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
-"
-"function! s:{s:plugin_noextention_name}(name)
-"    let self = s:base_class(a:name)
-"    let self.base = deepcopy(self)
-"
-"    function! self.initialize.mapping_key() abort
-"    endfunction
-"
-"    function! self.initialize.difine_command() abort
-"    endfunction
-"
-"    function! self.initialize.execute(self) abort
-"        call call(a:self.base.initialize.execute, [], self)
-"
-"        "TODO : Please implementation
-"    endfunction
-"
-"    function! s:configure_{s:plugin_noextention_name}() abort
-"    endfunction
-"
-"    return self
-"endfunction
-"
-"call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-
-
-" vimproc.vim {
-let s:plugin_name = 'vimproc.vim'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
-
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
-
-    function! self.initialize.mapping_key() abort
-    endfunction
-
-    function! self.initialize.difine_command() abort
-    endfunction
-
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
-
-        call neobundle#config({
-            \   'build' : {
-            \       'windows' : 'tools\\update-dll-mingw',
-            \       'cygwin' : 'make -f make_cygwin.mak',
-            \       'mac' : 'make -f make_mac.mak',
-            \       'linux' : 'make',
-            \       'unix' : 'gmake',
-            \   }
-            \ })
-    endfunction
-
-    function! s:configure_vimproc() abort
-    endfunction
-
-    return self
-endfunction
-
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }
-" unite.vim {
-let s:plugin_name = 'unite.vim'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
-
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
-
-    function! self.initialize.mapping_key() abort
-        nnoremap ,b :<C-u>Unite buffer -buffer-name=unite_buffer<CR>
-        nnoremap ,m :<C-u>Unite file_mru -buffer-name=unite_file_mru<CR>
-        nnoremap ,k :<C-u>Unite mapping -buffer-name=unite_mapping<CR>
-
-        nnoremap ,r :<C-u>Unite register -buffer-name=unite_register<CR>
-        nnoremap ,y :<C-u>Unite history/yank -buffer-name=unite_history_yank<CR>
-
-        nnoremap ,lc :<C-u>UniteWithBufferDir file<CR>
-        nnoremap ,lf :<C-u>Unite file:
-        nnoremap ,lr :<C-u>Unite file_rec/async:
-
-        nnoremap ,v :<C-u>UniteVimGrep<Space>
-        nnoremap ,g :<C-u>UniteGrep<Space>
-        nnoremap ,f :<C-u>UniteFind<Space>
-
-        nnoremap ,,b :<C-u>UniteResume unite_buffer<CR>
-        nnoremap ,,v :<C-u>UniteResume unite_vimgrep<CR>
-        nnoremap ,,g :<C-u>UniteResume unite_grep<CR>
-        nnoremap ,,f :<C-u>UniteResume unite_find<CR>
-
-        nnoremap ,] :<C-u>UniteWithCursorWord -immediately tag<CR>
-        nnoremap ,t :<C-u>Unite jump<CR>
-    endfunction
+    "let g:unite_source_file_mru_long_limit = 6000
+    "let g:unite_source_file_mru_limit = 300
+    "let g:unite_source_directory_mru_long_limit = 6000
+    "let g:unite_prompt = '❯ '
+    "let g:unite_kind_jump_list_after_jump_scroll=0
+    "let g:unite_source_rec_min_cache_files = 1000
+    "let g:unite_source_rec_max_cache_files = 5000
+    let g:unite_enable_start_insert = 0
+    let g:unite_source_history_yank_enable = 1
+    let g:neomru#time_format = "(%Y/%m/%d %H:%M:%S) "
+    let g:unite_source_grep_command = 'grep'
+    let g:unite_source_grep_default_opts = '-anHR --exclude-dir={.git,python2.6,perl-lib,target} --exclude={*.jpg,*.gif,*.png,*.tif,*.pdf,*.doc,*.docx,*.xls,*.xlsx,*.ppt,*.pptx,*.o,*.obj,*.pyc,*.so,*.class,*.jar,*.war,*.ear,*.dll,*.apk,*.asta,*.zip,*.rar,*.gz}'
+    let g:unite_source_grep_recursive_opt = ''
+    "let g:unite_source_grep_max_candidates = 0
 
     function! s:unite_vimgrep(pattern, directory, ...) abort
-        "a:1には拡張子を指定すること (例: *.py)
         if exists('a:1')
             let extension = a:1
         else
             let extension = '*'
         endif
 
-        if a:directory == '%'
-            let search_path = '%'
-        elseif a:directory == '.'
+        if a:directory == '.'
             let search_path = getcwd() . '/**/' . extension
+        elseif a:directory == '%'
+            let search_path = '%'
         else
             let search_path = a:directory . '/**/' . extension
         endif
@@ -570,17 +398,16 @@ function! s:{s:plugin_noextention_name}(name)
         execute 'Unite -buffer-name=unite_vimgrep vimgrep:' . search_path . ':' . pattern
     endfunction
 
+    command! -bar -nargs=+ UniteVimGrep call s:unite_vimgrep(<f-args>)
+
     function! s:unite_grep(pattern, directory, ...) abort
-        "a:1にはオプションを指定すること (例: -i)
         if exists('a:1')
             let option = a:1
         else
             let option = ''
         endif
 
-        if a:directory == '%'
-            let search_path = '%'
-        elseif a:directory == '.'
+        if a:directory == '.'
             let search_path = getcwd()
         else
             let search_path = a:directory
@@ -589,261 +416,187 @@ function! s:{s:plugin_noextention_name}(name)
         echomsg a:pattern
         let pattern = substitute(a:pattern, ' ', '\\ ', 'g')
         echomsg pattern
-        let pattern = substitute(pattern, '\\', '\\\\', 'g')
+        let pattern = substitute(pattern, '\\', '\\\\\\\\\\', 'g')
         echomsg pattern
 
-        echomsg 'Unite -buffer-name=unite_grep grep:' . search_path . ':' . option . ':' . pattern
-        execute 'Unite -buffer-name=unite_grep grep:' . search_path . ':' . option . ':' . pattern
+        echomsg 'Unite -buffer-name=unite_grep grep:' . search_path . ':' . option . ':' .  pattern
+        execute 'Unite -buffer-name=unite_grep grep:' . search_path . ':' . option . ':' .  pattern
     endfunction
 
-    function! s:unite_find(file_name) abort
-        if !exists('a:file_name')
-            throw '引数にfile_nameが指定されていません。'
-        endif
+    command! -bar -nargs=+ UniteGrep call s:unite_grep(<f-args>)
 
+    function! s:unite_find(file_name) abort
         let file_name = '-iname ' . '''' . a:file_name . ''''
 
         echomsg 'Unite -buffer-name=unite_find find:' . getcwd() . ':' . substitute(file_name, '\ ', '\\ ', 'g')
         execute 'Unite -buffer-name=unite_find find:' . getcwd() . ':' . substitute(file_name, '\ ', '\\ ', 'g')
     endfunction
 
-    function! self.initialize.difine_command() abort
-        command! -bar -nargs=+ UniteVimGrep call s:unite_vimgrep(<f-args>)
-        command! -bar -nargs=+ UniteGrep call s:unite_grep(<f-args>)
-        command! -bar -nargs=1 UniteFind call s:unite_find(<f-args>)
-    endfunction
+    command! -bar -nargs=1 UniteFind call s:unite_find(<f-args>)
 
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
+    nnoremap ,b :<C-u>Unite buffer -buffer-name=unite_buffer<CR>
+    nnoremap ,m :<C-u>Unite file_mru -buffer-name=unite_file_mru<CR>
+    nnoremap ,k :<C-u>Unite mapping -buffer-name=unite_mapping<CR>
 
-        call neobundle#config({
-            \   'autoload' : {
-            \       'commands' : [
-            \           'Unite',
-            \           'UniteWithCursorWord',
-            \           'UniteWithInput',
-            \       ]
-            \   }
-            \ })
-    endfunction
+    nnoremap ,r :<C-u>Unite register -buffer-name=unite_register<CR>
+    nnoremap ,y :<C-u>Unite history/yank -buffer-name=unite_history_yank<CR>
 
-    function! s:configure_unite() abort
-        "let g:unite_source_file_mru_long_limit = 6000
-        "let g:unite_source_file_mru_limit = 300
-        "let g:unite_source_directory_mru_long_limit = 6000
-        "let g:unite_prompt = '❯ '
-        "let g:unite_kind_jump_list_after_jump_scroll=0
-        "let g:unite_source_rec_min_cache_files = 1000
-        "let g:unite_source_rec_max_cache_files = 5000
+    nnoremap ,lc :<C-u>UniteWithBufferDir file<CR>
+    nnoremap ,lf :<C-u>Unite file:
+    nnoremap ,lr :<C-u>Unite file_rec/async:
 
-        let g:unite_enable_start_insert = 0
-        let g:unite_source_history_yank_enable = 1
-        let g:neomru#time_format = "(%Y/%m/%d %H:%M:%S) "
+    nnoremap ,v :<C-u>UniteVimGrep<Space>
+    nnoremap ,g :<C-u>UniteGrep<Space>
+    nnoremap ,f :<C-u>UniteFind<Space>
 
-        let g:unite_source_grep_command = 'grep'
-        let g:unite_source_grep_default_opts = '-anHR --exclude-dir={.git,python2.6,perl-lib,target} --exclude={*.jpg,*.gif,*.png,*.tif,*.pdf,*.doc,*.docx,*.xls,*.xlsx,*.ppt,*.pptx,*.o,*.obj,*.pyc,*.so,*.class,*.jar,*.war,*.ear,*.dll,*.apk,*.asta,*.zip,*.rar,*.gz}'
-        let g:unite_source_grep_recursive_opt = ''
-        "let g:unite_source_grep_max_candidates = 0
+    nnoremap ,,b :<C-u>UniteResume unite_buffer<CR>
+    nnoremap ,,v :<C-u>UniteResume unite_vimgrep<CR>
+    nnoremap ,,g :<C-u>UniteResume unite_grep<CR>
+    nnoremap ,,f :<C-u>UniteResume unite_find<CR>
 
+    nnoremap ,] :<C-u>UniteWithCursorWord -immediately tag<CR>
+    nnoremap ,t :<C-u>Unite jump<CR>
+
+    function! neobundle#tapped.hooks.on_source(bundle) abort
         call unite#custom_max_candidates('vimgrep,grep,find', 0)
         call unite#custom_source('buffer', 'sorters', 'sorter_word')
         call unite#custom_source('file_mru', 'sorters', 'sorter_default')
     endfunction
 
-    return self
-endfunction
+    call neobundle#untap()
+endif
 
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" } unite.vim
+if neobundle#tap('neomru.vim')
+    call neobundle#config({
+        \   'autoload' : {
+        \       'unite_sources' : [
+        \           'file_mru',
+        \       ],
+        \   }
+        \ })
 
+    call neobundle#untap()
+endif
 
-" neomru {
-let s:plugin_name = 'neomru.vim'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+if neobundle#tap('tabpagebuffer.vim')
+    call neobundle#untap()
+endif
 
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
+if neobundle#tap('unite-outline')
+    call neobundle#config({
+        \   'autoload' : {
+        \       'unite_sources' : [
+        \           'outline',
+        \       ],
+        \   }
+        \ })
 
-    function! self.initialize.mapping_key() abort
-    endfunction
+    nnoremap ,o :<C-u>Unite outline<CR>
 
-    function! self.initialize.difine_command() abort
-    endfunction
+    call neobundle#untap()
+endif
 
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
+if neobundle#tap('vimshell.vim')
+    call neobundle#config({
+        \   'autoload' : {
+        \       'commands' : [
+        \           {'name': 'VimShell', 'complete': 'customlist,vimshell#complete'},
+        \           'VimShellExecute',
+        \           'VimShellInteractive',
+        \           'VimShellTerminal',
+        \           'VimShellPop'
+        \       ]
+        \   }
+        \ })
 
-        call neobundle#config({
-            \   'autoload' : {
-            \       'unite_sources' : [
-            \           'file_mru',
-            \       ],
-            \   }
-            \ })
-    endfunction
+    call neobundle#untap()
+endif
 
-    function! s:configure_neomru() abort
-    endfunction
+if neobundle#tap('neosnippet.vim')
+    call neobundle#config({
+        \   'autoload': {
+        \       'on_source': ['neocomplete.vim'],
+        \   }
+        \ })
 
-    return self
-endfunction
+    let g:neosnippet#data_directory = expand('~/.vim/etc/.cache/neosnippet')
+    let g:neosnippet#snippets_directory = expand('~/.vim/bundle/vim-snippets/snippets')
 
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }
-" tabpagebuffer {
-let s:plugin_name = 'tabpagebuffer.vim'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+    imap <C-k> <Plug>(neosnippet_expand_or_jump)
+    smap <C-k> <Plug>(neosnippet_expand_or_jump)
 
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
+    call neobundle#untap()
+endif
 
-    function! self.initialize.mapping_key() abort
-    endfunction
+if neobundle#tap('neocomplete.vim')
+    call neobundle#config({
+        \   'autoload' : {
+        \       'insert' : 1,
+        \   }
+        \ })
 
-    function! self.initialize.difine_command() abort
-    endfunction
+    " Note: This option must set it in .vimrc(_vimrc).
+    " NOT IN .gvimrc(_gvimrc)!
+    " Disable AutoComplPop.
+    let g:acp_enableAtStartup = 0
+    " Use neocomplete.
+    let g:neocomplete#enable_at_startup = 1
+    " Use smartcase.
+    let g:neocomplete#enable_smart_case = 1
+    let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
 
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
+    " Define dictionary.
+    let g:neocomplete#sources#dictionary#dictionaries = {
+            \ 'default' : '',
+            \ 'vimshell' : $HOME.'/.vimshell_hist',
+            \ 'scheme' : $HOME.'/.gosh_completions'
+            \ }
 
-        call neobundle#config({
-            \   'autoload' : {
-            \       'unite_sources' : [
-            \           'buffer_tab',
-            \       ],
-            \   }
-            \ })
-    endfunction
+    " Define keyword.
+    if !exists('g:neocomplete#keyword_patterns')
+        let g:neocomplete#keyword_patterns = {}
+    endif
 
-    function! s:configure_tabpagebuffer() abort
-    endfunction
+    let g:neocomplete#keyword_patterns['default'] = '\h\w*'
 
-    return self
-endfunction
+    " AutoComplPop like behavior.
+    " let g:neocomplete#enable_auto_select = 1
 
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }
-" unite-outline {
-let s:plugin_name = 'unite-outline'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+    " Shell like behavior(not recommended).
+    " set completeopt+=longest
+    " let g:neocomplete#enable_auto_select = 1
+    " let g:neocomplete#disable_auto_complete = 1
+    " inoremap <expr><TAB>  pumvisible() ? "\<Down>" :
+    " \ neocomplete#start_manual_complete()
 
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
+    " Enable heavy omni completion.
+    if !exists('g:neocomplete#sources#omni#input_patterns')
+        let g:neocomplete#sources#omni#input_patterns = {}
+    endif
 
-    function! self.initialize.mapping_key() abort
-      nnoremap ,o :<C-u>Unite outline<CR>
-    endfunction
+    if !exists('g:neocomplete#force_omni_input_patterns')
+        let g:neocomplete#force_omni_input_patterns = {}
+    endif
+    " let g:neocomplete#sources#omni#input_patterns.php =
+    "   \ '[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
+    " let g:neocomplete#sources#omni#input_patterns.c =
+    "   \ '[^.[:digit:] *\t]\%(\.\|->\)\%(\h\w*\)\?'
+    " let g:neocomplete#sources#omni#input_patterns.cpp =
+    "   \ '[^.[:digit:] *\t]\%(\.\|->\)\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
 
-    function! self.initialize.difine_command() abort
-    endfunction
+    " For perlomni.vim setting.
+    " https://github.com/c9s/perlomni.vim
+    let g:neocomplete#sources#omni#input_patterns.perl =
+            \ '[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
 
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
-
-        call neobundle#config({
-            \   'autoload' : {
-            \       'unite_sources' : [
-            \           'outline',
-            \       ],
-            \   }
-            \ })
-    endfunction
-
-    function! s:configure_unite_outline() abort
-    endfunction
-
-    return self
-endfunction
-
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }
-" vimshell {
-let s:plugin_name = 'vimshell.vim'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
-
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
-
-    function! self.initialize.mapping_key() abort
-    endfunction
-
-    function! self.initialize.difine_command() abort
-    endfunction
-
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
-
-        call neobundle#config({
-            \   'autoload' : {
-            \       'commands' : [
-            \           {
-            \               'name' : 'VimShell',
-            \               'complete' : 'customlist,vimshell#complete'
-            \           },
-            \           'VimShellExecute',
-            \           'VimShellInteractive',
-            \           'VimShellTerminal',
-            \           'VimShellPop'
-            \       ]
-            \   }
-            \ })
-    endfunction
-
-    function! s:configure_vimshell() abort
-    endfunction
-
-    return self
-endfunction
-
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }
-" neosnippet {
-let s:plugin_name = 'neosnippet.vim'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
-
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
-
-    function! self.initialize.mapping_key() abort
-        imap <C-k> <Plug>(neosnippet_expand_or_jump)
-        smap <C-k> <Plug>(neosnippet_expand_or_jump)
-    endfunction
-
-    function! self.initialize.difine_command() abort
-    endfunction
-
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
-
-        call neobundle#config({
-            \   'autoload' : {
-            \       'on_source': ['neocomplete.vim'],
-            \   }
-            \ })
-    endfunction
-
-    function! s:configure_neosnippet() abort
-        let g:neosnippet#data_directory = expand('~/.vim/etc/.cache/neosnippet')
-        let g:neosnippet#snippets_directory = expand('~/.vim/bundle/vim-snippets/snippets')
-    endfunction
-
-    return self
-endfunction
-
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }
-" neocomplete {
-let s:plugin_name = 'neocomplete.vim'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
-
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
+    " Enable omni completion.
+    autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+    autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+    autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+    autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+    " jedi-vimを使う場合はoff
+    "autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+    "autocmd FileType python setlocal completeopt-=preview
 
     function! s:neocomplete_my_cr_function()
         " return neocomplete#close_popup() . "\<CR>"
@@ -851,684 +604,317 @@ function! s:{s:plugin_noextention_name}(name)
         return pumvisible() ? neocomplete#close_popup() : "\<CR>"
     endfunction
 
-    function! self.initialize.mapping_key() abort
-        " Plugin key-mappings.
-        inoremap <expr><C-g>     neocomplete#undo_completion()
-        inoremap <expr><C-l>     neocomplete#complete_common_string()
+    " Plugin key-mappings.
+    inoremap <expr><C-g>     neocomplete#undo_completion()
+    inoremap <expr><C-l>     neocomplete#complete_common_string()
 
-        " Recommended key-mappings.
-        " <CR>: close popup and save indent.
-        inoremap <silent> <CR> <C-r>=<SID>neocomplete_my_cr_function()<CR>
-        " <TAB>: completion.
-        inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
-        " <C-h>, <BS>: close popup and delete backword char.
-        inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
-        inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
-        inoremap <expr><C-y>  neocomplete#close_popup()
-        inoremap <expr><C-e>  neocomplete#cancel_popup()
-        " Close popup by <Space>.
-        " inoremap <expr><Space> pumvisible() ? neocomplete#close_popup() : "\<Space>"
+    " Recommended key-mappings.
+    " <CR>: close popup and save indent.
+    inoremap <silent> <CR> <C-r>=<SID>neocomplete_my_cr_function()<CR>
+    " <TAB>: completion.
+    inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+    " <C-h>, <BS>: close popup and delete backword char.
+    inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
+    inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
+    inoremap <expr><C-y>  neocomplete#close_popup()
+    inoremap <expr><C-e>  neocomplete#cancel_popup()
+    " Close popup by <Space>.
+    " inoremap <expr><Space> pumvisible() ? neocomplete#close_popup() : "\<Space>"
 
-        " For smart TAB completion.
-        " inoremap <expr><TAB>  pumvisible() ? "\<C-n>" :
-        "         \ <SID>check_back_space() ? "\<TAB>" :
-        "         \ neocomplete#start_manual_complete()
-        "
-        " function! s:check_back_space() "{{{
-        "   let col = col('.') - 1
-        "   return !col || getline('.')[col - 1]  =~ '\s'
-        " endfunction"}}}
-    endfunction
+    " For smart TAB completion.
+    " inoremap <expr><TAB>  pumvisible() ? "\<C-n>" :
+    "         \ <SID>check_back_space() ? "\<TAB>" :
+    "         \ neocomplete#start_manual_complete()
+    "
+    " function! s:check_back_space() "{{{
+    "   let col = col('.') - 1
+    "   return !col || getline('.')[col - 1]  =~ '\s'
+    " endfunction"}}}
 
-    function! self.initialize.difine_command() abort
-    endfunction
+    call neobundle#untap()
+endif
 
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
+if neobundle#tap('vimfiler.vim')
+    call neobundle#config({
+        \   'autoload' : {
+        \       'commands' : [
+        \           'VimFilerTab',
+        \           'VimFiler',
+        \           'VimFilerExplorer',
+        \           'VimFilerBufferDir',
+        \       ],
+        \       'explorer' : 1,
+        \   }
+        \ })
 
-        call neobundle#config({
-            \   'autoload' : {
-            \       'insert' : 1,
-            \   }
-            \ })
-    endfunction
-
-    function! s:configure_neocomplete() abort
-        " Note: This option must set it in .vimrc(_vimrc).
-        " NOT IN .gvimrc(_gvimrc)!
-        " Disable AutoComplPop.
-        let g:acp_enableAtStartup = 0
-        " Use neocomplete.
-        let g:neocomplete#enable_at_startup = 1
-        " Use smartcase.
-        let g:neocomplete#enable_smart_case = 1
-        let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
-
-        " Define dictionary.
-        let g:neocomplete#sources#dictionary#dictionaries = {
-                \ 'default' : '',
-                \ 'vimshell' : $HOME.'/.vimshell_hist',
-                \ 'scheme' : $HOME.'/.gosh_completions'
-                \ }
-
-        " Define keyword.
-        if !exists('g:neocomplete#keyword_patterns')
-            let g:neocomplete#keyword_patterns = {}
-        endif
-        let g:neocomplete#keyword_patterns['default'] = '\h\w*'
-
-
-        " AutoComplPop like behavior.
-        " let g:neocomplete#enable_auto_select = 1
-
-        " Shell like behavior(not recommended).
-        " set completeopt+=longest
-        " let g:neocomplete#enable_auto_select = 1
-        " let g:neocomplete#disable_auto_complete = 1
-        " inoremap <expr><TAB>  pumvisible() ? "\<Down>" :
-        " \ neocomplete#start_manual_complete()
-
-        " Enable heavy omni completion.
-        if !exists('g:neocomplete#sources#omni#input_patterns')
-            let g:neocomplete#sources#omni#input_patterns = {}
-        endif
-        if !exists('g:neocomplete#force_omni_input_patterns')
-            let g:neocomplete#force_omni_input_patterns = {}
-        endif
-        " let g:neocomplete#sources#omni#input_patterns.php =
-        "   \ '[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
-        " let g:neocomplete#sources#omni#input_patterns.c =
-        "   \ '[^.[:digit:] *\t]\%(\.\|->\)\%(\h\w*\)\?'
-        " let g:neocomplete#sources#omni#input_patterns.cpp =
-        "   \ '[^.[:digit:] *\t]\%(\.\|->\)\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
-
-        " For perlomni.vim setting.
-        " https://github.com/c9s/perlomni.vim
-        let g:neocomplete#sources#omni#input_patterns.perl =
-                \ '[^. \t]->\%(\h\w*\)\?\|\h\w*::\%(\h\w*\)\?'
-
-        " Enable omni completion.
-        autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-        autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-        autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-        autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-        " jedi-vimを使う場合はoff
-        "autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-        "autocmd FileType python setlocal completeopt-=preview
-    endfunction
-
-    return self
-endfunction
-
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }
-" vimfiler {
-let s:plugin_name = 'vimfiler.vim'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
-
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
-
-    function! self.initialize.mapping_key() abort
-      nnoremap <Leader>e :<C-u>OpenFileExplore<CR>
-      nnoremap <Leader>f :<C-u>ExpandCurrentDir<CR>
-    endfunction
+    let g:vimfiler_as_default_explorer  = 1
+    let g:vimfiler_safe_mode_by_default = 0
+    let g:vimfiler_data_directory       = expand('~/.vim/etc/vimfiler')
+    " let g:vimfiler_enable_auto_cd = 1
 
     function! s:open_file_explore() abort
-      execute 'VimFilerExplore -winwidth=45 -winminwidth=45 -fnamewidth=45 -no-focus'
+        execute 'VimFilerExplore -winwidth=45 -winminwidth=45 -fnamewidth=45 -no-focus'
 
-      if winnr('$') == 3
-        call s:reset_window()
-      endif
+        if winnr('$') == 3
+            call s:reset_window()
+        endif
     endfunction
+
+    command! -bar OpenFileExplore call s:open_file_explore()
+    nnoremap <Leader>e :<C-u>OpenFileExplore<CR>
 
     function! s:expand_current_dir() abort
-      execute 'VimFilerCurrentDir -winwidth=45 -winminwidth=45 -fnamewidth=45 -no-focus -explorer -find'
+        execute 'VimFilerCurrentDir -winwidth=45 -winminwidth=45 -fnamewidth=45 -no-focus -explorer -find'
 
-      if winnr('$') == 3
-        call s:reset_window()
-      endif
+        if winnr('$') == 3
+            call s:reset_window()
+        endif
     endfunction
 
-    function! self.initialize.difine_command() abort
-      command! -bar OpenFileExplore call s:open_file_explore()
-      command! -bar ExpandCurrentDir call s:expand_current_dir()
-    endfunction
+    command! -bar ExpandCurrentDir call s:expand_current_dir()
+    nnoremap <Leader>f :<C-u>ExpandCurrentDir<CR>
 
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
+    call neobundle#untap()
+endif
 
-        call neobundle#config({
-            \   'autoload' : {
-            \       'commands' : [
-            \           'VimFilerTab',
-            \           'VimFiler',
-            \           'VimFilerExplorer',
-            \           'VimFilerBufferDir',
-            \       ],
-            \       'explorer' : 1,
-            \   }
-            \ })
-    endfunction
+if neobundle#tap('matchit.zip')
+    call neobundle#untap()
+endif
 
-    function! s:configure_vimfiler() abort
-        let g:vimfiler_as_default_explorer  = 1
-        let g:vimfiler_safe_mode_by_default = 0
-        let g:vimfiler_data_directory       = expand('~/.vim/etc/vimfiler')
-        " let g:vimfiler_enable_auto_cd = 1
-    endfunction
+if neobundle#tap('vim-brightest')
+    let g:brightest#pattern = '\k\+'
 
-    return self
-endfunction
+    " filetype=vim のみを有効にする
+    let g:brightest#enable_filetypes = {
+            \   "_"   : 1,
+            \   "vim" : 1,
+            \   "java" : 1,
+            \   "python" : 1,
+            \   "javascript" : 1,
+            \   "bash" : 1,
+            \   "sh" : 1,
+            \   "php" : 1,
+            \   "html" : 1,
+            \   "jsp" : 1,
+            \ }
 
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }
-" matchit.zip {
-let s:plugin_name = 'matchit.zip'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+    let g:brightest#highlight = {
+            \   "group" : "Search",
+            \ }
 
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
+    nnoremap <Space>b :<C-u>BrightestToggle<CR>
 
-    function! self.initialize.mapping_key() abort
-    endfunction
+    call neobundle#untap()
+endif
 
-    function! self.initialize.difine_command() abort
-    endfunction
+if neobundle#tap('vim-surround')
+    call neobundle#untap()
+endif
 
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
+if neobundle#tap('syntastic')
+    call neobundle#config({
+        \   'autoload' : {
+        \       'insert' : 1,
+        \   }
+        \ })
 
-        call neobundle#config({
-            \   'autoload' : {
-            \       'filetypes' : [
-            \           'jsp',
-            \           'smarty',
-            \           'html',
-            \           'xml',
-            \       ],
-            \   }
-            \ })
-    endfunction
+    " set statusline+=%#warningmsg#
+    " set statusline+=%{SyntasticStatuslineFlag()}
+    " set statusline+=%*
 
-    function! s:configure_matchit() abort
-    endfunction
+    " let g:syntastic_always_populate_loc_list = 1
+    " let g:syntastic_enable_signs = 1
+    " let g:syntastic_auto_loc_list = 1
+    " let g:syntastic_check_on_open = 1
+    " let g:syntastic_check_on_wq = 0
+    let g:syntastic_python_checkers = ["flake8"]
 
-    return self
-endfunction
+    call neobundle#untap()
+endif
 
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }
-" vim-brightest {{{
-let s:plugin_name = 'vim-brightest'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+if neobundle#tap('tagbar')
+    call neobundle#config({
+        \   "autload": {
+        \       "commands": [
+        \           "TagbarToggle",
+        \       ],
+        \   }
+        \ })
 
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
+    let g:tagbar_ctags_bin = '/usr/bin/ctags'
+    let g:tagbar_width = 44
+    let g:tagbar_type_markdown = {
+        \   'ctagstype': 'markdown',
+        \   'ctagsbin' : expand('~/.vim/bundle/markdown2ctags/markdown2ctags.py'),
+        \   'ctagsargs' : '-f - --sort=yes',
+        \   'kinds' : [
+        \       's:sections',
+        \       'i:images'
+        \   ],
+        \   'sro' : '|',
+        \   'kind2scope' : {
+        \       's' : 'section',
+        \   },
+        \   'sort': 0,
+        \ }
 
-    function! self.initialize.mapping_key() abort
-        nnoremap <Space>b :<C-u>BrightestToggle<CR>
-    endfunction
-
-    function! self.initialize.difine_command() abort
-    endfunction
-
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
-
-
-        let g:brightest#pattern = '\k\+'
-
-        " filetype=vim のみを有効にする
-        let g:brightest#enable_filetypes = {
-                \   "_"   : 1,
-                \   "vim" : 1,
-                \   "java" : 1,
-                \   "python" : 1,
-                \   "javascript" : 1,
-                \   "bash" : 1,
-                \   "sh" : 1,
-                \   "php" : 1,
-                \   "html" : 1,
-                \   "jsp" : 1,
-                \ }
-
-        let g:brightest#highlight = {
-                \   "group" : "Search",
-                \ }
-    endfunction
-
-    function! s:configure_vim_brightest() abort
-    endfunction
-
-    return self
-endfunction
-
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }}}
-" vim-surround {
-let s:plugin_name = 'vim-surround'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
-
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
-
-    function! self.initialize.mapping_key() abort
-    endfunction
-
-    function! self.initialize.difine_command() abort
-    endfunction
-
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
-
-        call neobundle#config({
-            \   'autoload' : {
-            \       'insert' : 1,
-            \   }
-            \ })
-    endfunction
-
-    function! s:configure_vim_surround() abort
-    endfunction
-
-    return self
-endfunction
-
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }
-" syntastic {
-let s:plugin_name = 'syntastic'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
-
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
-
-    function! self.initialize.mapping_key() abort
-    endfunction
-
-    function! self.initialize.difine_command() abort
-    endfunction
-
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
-
-        call neobundle#config({
-            \   'autoload' : {
-            \       'insert' : 1,
-            \   }
-            \ })
-    endfunction
-
-    function! s:configure_syntastic() abort
-        " set statusline+=%#warningmsg#
-        " set statusline+=%{SyntasticStatuslineFlag()}
-        " set statusline+=%*
-
-        " let g:syntastic_always_populate_loc_list = 1
-        " let g:syntastic_enable_signs = 1
-        " let g:syntastic_auto_loc_list = 1
-        " let g:syntastic_check_on_open = 1
-        " let g:syntastic_check_on_wq = 0
-        let g:syntastic_python_checkers = ["flake8"]
-    endfunction
-
-    return self
-endfunction
-
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }
-" tagbar {
-let s:plugin_name = 'tagbar'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
-
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
-
-    function! self.initialize.mapping_key() abort
-        nnoremap <Leader>t :<C-u>OpenCloseTagbar<CR>
-        nnoremap <Leader>s :<C-u>TagbarShowTag<CR>
-    endfunction
+    let g:tagbar_type_javascript = {
+        \ 'ctagstype': 'js',
+        \ 'kinds': [
+              \ 'a:array',
+              \ 'o:object',
+              \ 'r:var',
+              \ 'f:function'
+          \ ]
+        \ }
 
     function! s:open_tagbar() abort
-      execute 'TagbarToggle'
+        execute 'TagbarToggle'
 
-      if winnr('$') == 3
-        call s:reset_window()
-      endif
-    endfunction
-
-    function! self.initialize.difine_command() abort
-      command! -bar OpenCloseTagbar call s:open_tagbar()
-    endfunction
-
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
-
-        call neobundle#config({
-            \   "autload": {
-            \       "commands": [
-            \           "TagbarToggle",
-            \       ],
-            \   }
-            \ })
-    endfunction
-
-    function! s:configure_tagbar() abort
-        let g:tagbar_ctags_bin = '/usr/bin/ctags'
-        let g:tagbar_width = 44
-        let g:tagbar_type_markdown = {
-            \   'ctagstype': 'markdown',
-            \   'ctagsbin' : expand('~/.vim/bundle/markdown2ctags/markdown2ctags.py'),
-            \   'ctagsargs' : '-f - --sort=yes',
-            \   'kinds' : [
-            \       's:sections',
-            \       'i:images'
-            \   ],
-            \   'sro' : '|',
-            \   'kind2scope' : {
-            \       's' : 'section',
-            \   },
-            \   'sort': 0,
-            \ }
-
-        let g:tagbar_type_javascript = {
-            \ 'ctagstype': 'js',
-            \ 'kinds': [
-                  \ 'a:array',
-                  \ 'o:object',
-                  \ 'r:var',
-                  \ 'f:function'
-              \ ]
-            \ }
-    endfunction
-
-    return self
-endfunction
-
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }
-" tabular {
-let s:plugin_name = 'tabular'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
-
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
-
-    function! self.initialize.mapping_key() abort
-    endfunction
-
-    function! self.initialize.difine_command() abort
-    endfunction
-
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
-
-        call neobundle#config({
-            \   'autoload' : {
-            \       'filetypes' : ['markdown'],
-            \   }
-            \ })
-    endfunction
-
-    function! s:configure_tabular() abort
-    endfunction
-
-    return self
-endfunction
-
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }
-" vim-markdown {
-let s:plugin_name = 'vim-markdown'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
-
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
-
-    function! self.initialize.mapping_key() abort
-    endfunction
-
-    function! self.initialize.difine_command() abort
-    endfunction
-
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
-
-        call neobundle#config({
-            \   'autoload' : {
-            \       'filetypes' : ['markdown'],
-            \   }
-            \ })
-    endfunction
-
-    function! s:configure_vim_markdown() abort
-        let g:vim_markdown_folding_disabled = 1
-
-        let g:vim_markdown_fenced_languages = [
-            \   'csharp=cs',
-            \   'java',
-            \   'php',
-            \   'python',
-            \   'ruby',
-            \   'html',
-            \   'vim',
-            \   'sh',
-            \   'text'
-            \ ]
-    endfunction
-
-    return self
-endfunction
-
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }
-" jedi-vim {
-let s:plugin_name = 'jedi-vim'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
-
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
-
-    function! self.initialize.mapping_key() abort
-    endfunction
-
-    function! self.initialize.difine_command() abort
-    endfunction
-
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
-
-        call neobundle#config({
-            \   "autoload": {
-            \       "filetypes": [
-            \           "python",
-            \           "python3",
-            \           "djangohtml",
-            \       ],
-            \   }
-            \ })
-    endfunction
-
-    function! s:configure_jedi_vim() abort
-        " quickrunと被るため大文字に変更
-        let g:jedi#rename_command = '<Leader>R'
-        let g:jedi#goto_assignments_command = '<Leader>G'
-        " gundoと被るため大文字に変更 (2013-06-24 10:00 追記）
-        let g:jedi#goto_command = '<Leader>G'
-        let g:jedi#completions_enabled = 0
-        " 補完の最初の項目が選択された状態だと使いにくいためオフにする
-        " let g:jedi#popup_select_first = 0
-
-        " jediにvimの設定を任せると'completeopt+=preview'するので
-        " 自動設定機能をOFFにし手動で設定を行う
-        let g:jedi#auto_vim_configuration = 0
-
-        if !exists('g:neocomplete#force_omni_input_patterns')
-            let g:neocomplete#force_omni_input_patterns = {}
+        if winnr('$') == 3
+            call s:reset_window()
         endif
-
-        let g:neocomplete#force_omni_input_patterns.python = '\h\w*\|[^. \t]\.\w*'
-
-        autocmd FileType python setlocal omnifunc=jedi#completions
-        autocmd FileType python setlocal completeopt-=preview
     endfunction
 
-    return self
-endfunction
+    command! -bar OpenCloseTagbar call s:open_tagbar()
+    nnoremap <Leader>t :<C-u>OpenCloseTagbar<CR>
 
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }
-" vim-virtualenv {
-let s:plugin_name = 'vim-virtualenv'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+    nnoremap <Leader>s :<C-u>TagbarShowTag<CR>
 
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
+    call neobundle#untap()
+endif
 
-    function! self.initialize.mapping_key() abort
-    endfunction
+if neobundle#tap('tabular')
+    call neobundle#config({
+        \   'autoload' : {
+        \       'filetypes' : ['markdown'],
+        \   }
+        \ })
 
-    function! self.initialize.difine_command() abort
-    endfunction
+    call neobundle#untap()
+endif
 
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
+if neobundle#tap('vim-markdown')
+    let g:vim_markdown_folding_disabled = 1
 
-        call neobundle#config({
-            \   "autoload": {
-            \       "filetypes": [
-            \           "python",
-            \           "python3",
-            \           "djangohtml",
-            \       ],
-            \   }
-            \ })
-    endfunction
+    let g:vim_markdown_fenced_languages = [
+        \   'csharp=cs',
+        \   'java',
+        \   'php',
+        \   'python',
+        \   'ruby',
+        \   'html',
+        \   'vim',
+        \   'sh',
+        \   'text'
+        \ ]
 
-    function! s:configure_vim_virtualenv() abort
-    endfunction
+    call neobundle#untap()
+endif
 
-    return self
-endfunction
+if neobundle#tap('jedi-vim')
+    call neobundle#config({
+        \   "autoload": {
+        \       "filetypes": [
+        \           "python",
+        \           "python3",
+        \           "djangohtml",
+        \       ],
+        \   }
+        \ })
 
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }
-" vim-django-support {
-let s:plugin_name = 'vim-django-support'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
+    " quickrunと被るため大文字に変更
+    let g:jedi#rename_command = '<Leader>R'
+    let g:jedi#goto_assignments_command = '<Leader>G'
+    " gundoと被るため大文字に変更 (2013-06-24 10:00 追記）
+    let g:jedi#goto_command = '<Leader>G'
+    let g:jedi#completions_enabled = 0
+    " 補完の最初の項目が選択された状態だと使いにくいためオフにする
+    " let g:jedi#popup_select_first = 0
 
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
+    " jediにvimの設定を任せると'completeopt+=preview'するので
+    " 自動設定機能をOFFにし手動で設定を行う
+    let g:jedi#auto_vim_configuration = 0
 
-    function! self.initialize.mapping_key() abort
-    endfunction
-
-    function! self.initialize.difine_command() abort
-    endfunction
-
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
-
-        call neobundle#config({
-            \   "autoload": {
-            \       "filetypes": [
-            \           "python",
-            \           "python3",
-            \           "djangohtml",
-            \       ],
-            \   }
-            \ })
-    endfunction
-
-    function! s:configure_vim_django_support() abort
-    endfunction
-
-    return self
-endfunction
-
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }
-" emmet-vim {
-let s:plugin_name = 'emmet-vim'
-let s:plugin_noextention_name = s:get_noextention_name(s:plugin_name)
-
-function! s:{s:plugin_noextention_name}(name)
-    let self = s:base_class(a:name)
-    let self.base = deepcopy(self)
-
-    function! self.initialize.mapping_key() abort
-    endfunction
-
-    function! self.initialize.difine_command() abort
-    endfunction
-
-    function! self.initialize.execute(self) abort
-        call call(a:self.base.initialize.execute, [], self)
-
-        call neobundle#config({
-            \   'autoload' : {
-            \       'filetypes' : [
-            \           'html',
-            \           'html5',
-            \           'eruby',
-            \           'jsp',
-            \           'xml',
-            \           'css',
-            \           'scss',
-            \           'coffee',
-            \           'smarty',
-            \       ],
-            \       'commands' : [
-            \           '<Plug>ZenCodingExpandNormal',
-            \       ]
-            \   }
-            \ })
-    endfunction
-
-    function! s:configure_emmet_vim() abort
-        let g:use_emmet_complete_tag = 1
-        let g:user_emmet_settings = {
-            \   'variables': {
-            \       'lang' : 'ja'
-            \   },
-            \   'html': {
-            \       'indentation': '  '
-            \   }
-            \ }
-    endfunction
-
-    return self
-endfunction
-
-call add(s:plugin_obj_list, s:{s:plugin_noextention_name}(s:plugin_name))
-" }
-
-
-for s:plugin_obj in s:plugin_obj_list
-    if neobundle#tap(s:get_class_name(s:plugin_obj))
-        function! neobundle#tapped.hooks.on_source(bundle) abort
-            let plugin_noextention_name = s:get_noextention_name(a:bundle.name)
-            call s:configure_{plugin_noextention_name}()
-        endfunction
-
-        call s:initialize(s:plugin_obj)
-        call neobundle#untap()
+    if !exists('g:neocomplete#force_omni_input_patterns')
+        let g:neocomplete#force_omni_input_patterns = {}
     endif
-endfor
+
+    let g:neocomplete#force_omni_input_patterns.python = '\h\w*\|[^. \t]\.\w*'
+
+    autocmd FileType python setlocal omnifunc=jedi#completions
+    autocmd FileType python setlocal completeopt-=preview
+
+    call neobundle#untap()
+endif
+
+if neobundle#tap('vim-virtualenv')
+    call neobundle#config({
+        \   "autoload": {
+        \       "filetypes": [
+        \           "python",
+        \           "python3",
+        \           "djangohtml",
+        \       ],
+        \   }
+        \ })
+
+    call neobundle#untap()
+endif
+
+if neobundle#tap('vim-django-support')
+    call neobundle#config({
+        \   "autoload": {
+        \       "filetypes": [
+        \           "python",
+        \           "python3",
+        \           "djangohtml",
+        \       ],
+        \   }
+        \ })
+
+    call neobundle#untap()
+endif
+
+if neobundle#tap('emmet-vim')
+    call neobundle#config({
+        \   'autoload' : {
+        \       'filetypes' : [
+        \           'html',
+        \           'html5',
+        \           'eruby',
+        \           'jsp',
+        \           'xml',
+        \           'css',
+        \           'scss',
+        \           'coffee',
+        \           'smarty',
+        \       ],
+        \       'commands' : [
+        \           '<Plug>ZenCodingExpandNormal',
+        \       ]
+        \   }
+        \ })
+
+    let g:use_emmet_complete_tag = 1
+    let g:user_emmet_settings = {
+        \   'variables': {
+        \       'lang' : 'ja'
+        \   },
+        \   'html': {
+        \       'indentation': '  '
+        \   }
+        \ }
+
+    call neobundle#untap()
+endif
+
 
 " 後処理 {
+    call neobundle#end()
+    filetype plugin indent on       " Required!
+    NeoBundleCheck
+
     syntax on
     colorscheme jellybeans
 
