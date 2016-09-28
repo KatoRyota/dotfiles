@@ -139,7 +139,7 @@
         " 置換の時 g オプションをデフォルトで有効
         " set gdefault
         " :grep(外部grep)の設定
-        set grepprg=grep\ -anHR\ --exclude-dir={.git,python2.6,perl-lib,target}\ --exclude={*.jpg,*.gif,*.png,*.tif,*.pdf,*.doc,*.docx,*.xls,*.xlsx,*.ppt,*.pptx,*.o,*.obj,*.pyc,*.so,*.class,*.jar,*.war,*.ear,*.dll,*.apk,*.asta,*.zip,*.rar,*.gz}
+        set grepprg=grep\ -anHPR\ --exclude-dir={.git,python2.6,perl-lib,target}\ --exclude={*.jpg,*.gif,*.png,*.tif,*.pdf,*.doc,*.docx,*.xls,*.xlsx,*.ppt,*.pptx,*.o,*.obj,*.pyc,*.so,*.class,*.jar,*.war,*.ear,*.dll,*.apk,*.asta,*.zip,*.rar,*.gz}
         " 内部grepの検索対象から除外
         set wildignore=*.jpg,*.gif,*.png,*.tif,
                       \*.pdf,
@@ -369,7 +369,7 @@ if neobundle#tap('unite.vim')
     let g:unite_source_history_yank_enable = 1
     let g:neomru#time_format = "(%Y/%m/%d %H:%M:%S) "
     let g:unite_source_grep_command = 'grep'
-    let g:unite_source_grep_default_opts = '-anHR --exclude-dir={.git,python2.6,perl-lib,target} --exclude={*.jpg,*.gif,*.png,*.tif,*.pdf,*.doc,*.docx,*.xls,*.xlsx,*.ppt,*.pptx,*.o,*.obj,*.pyc,*.so,*.class,*.jar,*.war,*.ear,*.dll,*.apk,*.asta,*.zip,*.rar,*.gz}'
+    let g:unite_source_grep_default_opts = '-anHPR --exclude-dir={.git,python2.6,perl-lib,target} --exclude={*.jpg,*.gif,*.png,*.tif,*.pdf,*.doc,*.docx,*.xls,*.xlsx,*.ppt,*.pptx,*.o,*.obj,*.pyc,*.so,*.class,*.jar,*.war,*.ear,*.dll,*.apk,*.asta,*.zip,*.rar,*.gz}'
     let g:unite_source_grep_recursive_opt = ''
     "let g:unite_source_grep_max_candidates = 0
 
@@ -416,7 +416,7 @@ if neobundle#tap('unite.vim')
         echomsg a:pattern
         let pattern = substitute(a:pattern, ' ', '\\ ', 'g')
         echomsg pattern
-        let pattern = substitute(pattern, '\\', '\\\\\\\\\\', 'g')
+        let pattern = substitute(pattern, '\\', '\\\\\\\\', 'g')
         echomsg pattern
 
         echomsg 'Unite -buffer-name=unite_grep grep:' . search_path . ':' . option . ':' .  pattern
