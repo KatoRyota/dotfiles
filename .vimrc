@@ -401,22 +401,25 @@ if neobundle#tap('unite.vim')
     command! -bar -nargs=+ UniteVimGrep call s:unite_vimgrep(<f-args>)
 
     function! s:unite_grep(pattern, directory, ...) abort
+        let search_path = a:directory
+
         if exists('a:1')
             let option = a:1
         else
             let option = ''
         endif
 
-        if a:directory == '.'
-            let search_path = getcwd()
-        else
-            let search_path = a:directory
-        endif
+        echomsg option
+        let option = substitute(option, '\\', '\\\\\\', 'g')
+        echomsg option
+        let option = substitute(option, '\ ', '\\\\\\ ', 'g')
+        echomsg option
 
         echomsg a:pattern
-        let pattern = substitute(a:pattern, ' ', '\\ ', 'g')
+        let pattern = a:pattern
+        let pattern = substitute(pattern, '\\', '\\\\\\', 'g')
         echomsg pattern
-        let pattern = substitute(pattern, '\\', '\\\\\\\\', 'g')
+        let pattern = substitute(pattern, '\ ', '\\\\\\ ', 'g')
         echomsg pattern
 
         echomsg 'Unite -buffer-name=unite_grep grep:' . search_path . ':' . option . ':' .  pattern
