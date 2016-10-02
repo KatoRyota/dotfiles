@@ -6,7 +6,7 @@
     " 基本文字コード
     set fileencoding=utf-8
     " 文字コード自動判別(優先順)
-    set fileencodings=utf-8,iso-2022-jp,cp932,sjis,euc-jp,
+    set fileencodings=utf-8,euc-jp,cp932,sjis,iso-2022-jp,
     " 基本ファイルフォーマット
     set fileformat=unix
     " ファイルフォーマット自動判別(優先順)
@@ -113,7 +113,7 @@
         " カーソル行をハイライト
         set cursorline
         " n列目に色を付ける
-        set colorcolumn=120
+        set colorcolumn=100
         " "0"で始まる数値を、8進数として扱わないようにする
         set nrformats-=octal
     " }
