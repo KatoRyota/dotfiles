@@ -139,7 +139,7 @@
         " 置換の時 g オプションをデフォルトで有効
         " set gdefault
         " :grep(外部grep)の設定
-        set grepprg=grep\ -anHPR\ --exclude-dir={.git,python2.6,perl-lib,target}\ --exclude={*.jpg,*.gif,*.png,*.tif,*.pdf,*.doc,*.docx,*.xls,*.xlsx,*.ppt,*.pptx,*.o,*.obj,*.pyc,*.so,*.class,*.jar,*.war,*.ear,*.dll,*.apk,*.asta,*.zip,*.rar,*.gz}
+        set grepprg=grep\ -anHPR\ --exclude-dir={.git,python2.6,python3.4,perl-lib,target}\ --exclude={*.jpg,*.gif,*.png,*.tif,*.pdf,*.doc,*.docx,*.xls,*.xlsx,*.ppt,*.pptx,*.o,*.obj,*.pyc,*.so,*.class,*.jar,*.war,*.ear,*.dll,*.apk,*.asta,*.zip,*.rar,*.gz}
         " 内部grepの検索対象から除外
         set wildignore=*.jpg,*.gif,*.png,*.tif,
                       \*.pdf,
@@ -292,64 +292,79 @@
         NeoBundleFetch 'Shougo/neobundle.vim'
         " Use neobundle standard recipes.
         NeoBundle 'Shougo/neobundle-vim-recipes', {'force' : 1}
+
+        NeoBundle 'Shougo/vimproc.vim', {
+              \ 'build' : {
+              \     'windows' : 'make -f make_mingw32.mak',
+              \     'cygwin' : 'make -f make_cygwin.mak',
+              \     'mac' : 'make -f make_mac.mak',
+              \     'unix' : 'make -f make_unix.mak',
+              \    },
+              \ }
     " }
     " 一覧 {
-        "for common
-        NeoBundle 'nanotech/jellybeans.vim'
-        NeoBundle 'vim-scripts/matchit.zip'
-        NeoBundle 'Shougo/vimproc.vim'
-        NeoBundle 'Shougo/neosnippet-snippets'
-        NeoBundle 'Shougo/tabpagebuffer.vim', {'depends' : ['Shougo/unite.vim']}
+    "
+    "
+    "
+        " --- for unite ---
+        NeoBundleLazy 'Shougo/unite.vim', {'depends' : ['Shougo/vimproc.vim', 'Shougo/neoyank.vim',
+            \ 'Shougo/tabpagebuffer.vim', 'Shougo/neomru.vim', 'Shougo/unite-outline', 'tsukkee/unite-tag']}
+        NeoBundle 'Shougo/neoyank.vim'
+        NeoBundle 'Shougo/tabpagebuffer.vim'
+        NeoBundle 'Shougo/neomru.vim'
+        NeoBundle 'Shougo/unite-outline'
+        NeoBundle 'tsukkee/unite-tag'
 
-        NeoBundleLazy 'Shougo/unite.vim', {'depends' : ['Shougo/vimproc.vim']}
-        NeoBundleLazy 'Shougo/neomru.vim', {'depends' : ['Shougo/unite.vim']}
-        NeoBundleLazy 'Shougo/unite-outline', {'depends' : ['Shougo/unite.vim']}
+        " --- for vimfiler ---
         NeoBundleLazy 'Shougo/vimfiler.vim', {'depends' : ["Shougo/unite.vim"]}
-        NeoBundleLazy 'Shougo/neosnippet.vim', {'depends' : ['Shougo/neocomplete.vim', 'Shougo/neosnippet-snippets'] }
-        NeoBundleLazy 'Shougo/neocomplete.vim', {'depends' : ['Shougo/vimproc.vim']}
-        NeoBundleLazy 'Shougo/vimshell.vim', {'depends' : ['Shougo/vimproc.vim']}
-        NeoBundleLazy 'tsukkee/unite-tag'
-        NeoBundleLazy 'majutsushi/tagbar'
+
+        " --- for tagbar ---
+        NeoBundle 'majutsushi/tagbar'
         NeoBundleFetch 'jszakmeister/markdown2ctags'
-        NeoBundle 'tpope/vim-surround'
-        "NeoBundleLazy 'scrooloose/syntastic'
-        NeoBundle 'osyo-manga/vim-brightest'
 
-        "for markdown
-        NeoBundleLazy 'godlygeek/tabular'
+        " --- for neocomplete ---
+        NeoBundle 'Shougo/neocomplete.vim', {'depends' : ['Shougo/vimproc.vim', 'Shougo/neosnippet.vim']}
+        NeoBundle 'Shougo/neosnippet.vim', {'depends' : ['Shougo/neosnippet-snippets']}
+        NeoBundle 'Shougo/neosnippet-snippets'
+
+
+        " --- for vimshell ---
+        NeoBundleLazy 'Shougo/vimshell.vim', {'depends' : ['Shougo/vimproc.vim']}
+
+        " --- for markdown ---
         NeoBundle 'plasticboy/vim-markdown', {'depends' : ['godlygeek/tabular'] }
+        NeoBundle 'godlygeek/tabular'
 
-        "for python
+        " --- for python ---
         NeoBundleLazy 'davidhalter/jedi-vim'
         NeoBundleLazy 'jmcantrell/vim-virtualenv'
         "NeoBundleLazy 'lambdalisue/vim-django-support'
 
-        "for html
+        " --- for html ---
         NeoBundleLazy 'othree/html5.vim'
         "NeoBundleLazy 'mattn/emmet-vim'
 
-        "for css
+        " --- for css ---
         NeoBundle 'hail2u/vim-css3-syntax'
 
-        "for javascript
+        " --- for javascript ---
         NeoBundle 'pangloss/vim-javascript'
+
+        " --- for other ---
+        NeoBundle 'nanotech/jellybeans.vim'
+        NeoBundle 'vim-scripts/matchit.zip'
+        NeoBundle 'tpope/vim-surround'
+        NeoBundle 'osyo-manga/vim-brightest'
+        "NeoBundleLazy 'scrooloose/syntastic'
     " }
 " }
+
 
 " テンプレート/
 if neobundle#tap('')
     call neobundle#untap()
 endif
 " /テンプレート
-
-if neobundle#tap('vimproc.vim')
-    call neobundle#config({
-        \   'build': {'windows': 'tools\\update-dll-mingw', 'cygwin': 'make -f make_cygwin.mak', 'mac': 'make -f make_mac.mak',
-        \       'linux': 'make', 'unix': 'gmake'}
-        \ })
-
-    call neobundle#untap()
-endif
 
 if neobundle#tap('unite.vim')
     call neobundle#config({
@@ -358,20 +373,13 @@ if neobundle#tap('unite.vim')
         \   }
         \ })
 
-    "let g:unite_source_file_mru_long_limit = 6000
-    "let g:unite_source_file_mru_limit = 300
-    "let g:unite_source_directory_mru_long_limit = 6000
-    "let g:unite_prompt = '❯ '
-    "let g:unite_kind_jump_list_after_jump_scroll=0
-    "let g:unite_source_rec_min_cache_files = 1000
-    "let g:unite_source_rec_max_cache_files = 5000
     let g:unite_enable_start_insert = 0
-    let g:unite_source_history_yank_enable = 1
     let g:neomru#time_format = "(%Y/%m/%d %H:%M:%S) "
     let g:unite_source_grep_command = 'grep'
-    let g:unite_source_grep_default_opts = '-anHPR --exclude-dir={.git,python2.6,perl-lib,target} --exclude={*.jpg,*.gif,*.png,*.tif,*.pdf,*.doc,*.docx,*.xls,*.xlsx,*.ppt,*.pptx,*.o,*.obj,*.pyc,*.so,*.class,*.jar,*.war,*.ear,*.dll,*.apk,*.asta,*.zip,*.rar,*.gz}'
+    let g:unite_source_grep_default_opts = '-anHPR --exclude-dir={.git,python2.6,python3.4,perl-lib,target} --exclude={*.jpg,*.gif,*.png,*.tif,*.pdf,*.doc,*.docx,*.xls,*.xlsx,*.ppt,*.pptx,*.o,*.obj,*.pyc,*.so,*.class,*.jar,*.war,*.ear,*.dll,*.apk,*.asta,*.zip,*.rar,*.gz}'
     let g:unite_source_grep_recursive_opt = ''
-    "let g:unite_source_grep_max_candidates = 0
+    let g:unite_source_find_default_expr = '-iname '
+    let g:neoyank#limit = 0
 
     function! s:unite_vimgrep(pattern, directory, ...) abort
         if exists('a:1')
@@ -438,7 +446,7 @@ if neobundle#tap('unite.vim')
     command! -bar -nargs=1 UniteFind call s:unite_find(<f-args>)
 
     nnoremap ,b :<C-u>Unite buffer -buffer-name=unite_buffer<CR>
-    nnoremap ,m :<C-u>Unite file_mru -buffer-name=unite_file_mru<CR>
+    nnoremap ,m :<C-u>Unite neomru/file -buffer-name=unite_neomru_file<CR>
     nnoremap ,k :<C-u>Unite mapping -buffer-name=unite_mapping<CR>
 
     nnoremap ,r :<C-u>Unite register -buffer-name=unite_register<CR>
@@ -448,9 +456,9 @@ if neobundle#tap('unite.vim')
     nnoremap ,lf :<C-u>Unite file:
     nnoremap ,lr :<C-u>Unite file_rec/async:
 
-    nnoremap ,v :<C-u>UniteVimGrep<Space>
-    nnoremap ,g :<C-u>UniteGrep<Space>
-    nnoremap ,f :<C-u>UniteFind<Space>
+    nnoremap ,v :<C-u>Unite -buffer-name=unite_vimgrep vimgrep:./**/*:
+    nnoremap ,g :<C-u>Unite -buffer-name=unite_grep grep:.::
+    nnoremap ,f :<C-u>Unite -buffer-name=unite_find find:.:
 
     nnoremap ,,b :<C-u>UniteResume unite_buffer<CR>
     nnoremap ,,v :<C-u>UniteResume unite_vimgrep<CR>
@@ -463,38 +471,7 @@ if neobundle#tap('unite.vim')
     function! neobundle#tapped.hooks.on_source(bundle) abort
         call unite#custom_max_candidates('vimgrep,grep,find', 0)
         call unite#custom_source('buffer', 'sorters', 'sorter_word')
-        call unite#custom_source('file_mru', 'sorters', 'sorter_default')
     endfunction
-
-    call neobundle#untap()
-endif
-
-if neobundle#tap('neomru.vim')
-    call neobundle#config({
-        \   'autoload' : {
-        \       'unite_sources' : [
-        \           'file_mru',
-        \       ],
-        \   }
-        \ })
-
-    call neobundle#untap()
-endif
-
-if neobundle#tap('tabpagebuffer.vim')
-    call neobundle#untap()
-endif
-
-if neobundle#tap('unite-outline')
-    call neobundle#config({
-        \   'autoload' : {
-        \       'unite_sources' : [
-        \           'outline',
-        \       ],
-        \   }
-        \ })
-
-    nnoremap ,o :<C-u>Unite outline<CR>
 
     call neobundle#untap()
 endif
@@ -511,22 +488,6 @@ if neobundle#tap('vimshell.vim')
         \       ]
         \   }
         \ })
-
-    call neobundle#untap()
-endif
-
-if neobundle#tap('neosnippet.vim')
-    call neobundle#config({
-        \   'autoload': {
-        \       'on_source': ['neocomplete.vim'],
-        \   }
-        \ })
-
-    let g:neosnippet#data_directory = expand('~/.vim/etc/.cache/neosnippet')
-    let g:neosnippet#snippets_directory = expand('~/.vim/bundle/vim-snippets/snippets')
-
-    imap <C-k> <Plug>(neosnippet_expand_or_jump)
-    smap <C-k> <Plug>(neosnippet_expand_or_jump)
 
     call neobundle#untap()
 endif
@@ -637,6 +598,22 @@ if neobundle#tap('neocomplete.vim')
     call neobundle#untap()
 endif
 
+if neobundle#tap('neosnippet.vim')
+    call neobundle#config({
+        \   'autoload': {
+        \       'on_source': ['neocomplete.vim'],
+        \   }
+        \ })
+
+    let g:neosnippet#data_directory = expand('~/.vim/etc/.cache/neosnippet')
+    let g:neosnippet#snippets_directory = expand('~/.vim/bundle/vim-snippets/snippets')
+
+    imap <C-k> <Plug>(neosnippet_expand_or_jump)
+    smap <C-k> <Plug>(neosnippet_expand_or_jump)
+
+    call neobundle#untap()
+endif
+
 if neobundle#tap('vimfiler.vim')
     call neobundle#config({
         \   'autoload' : {
@@ -680,10 +657,6 @@ if neobundle#tap('vimfiler.vim')
     call neobundle#untap()
 endif
 
-if neobundle#tap('matchit.zip')
-    call neobundle#untap()
-endif
-
 if neobundle#tap('vim-brightest')
     let g:brightest#pattern = '\k\+'
 
@@ -707,10 +680,6 @@ if neobundle#tap('vim-brightest')
 
     nnoremap <Space>b :<C-u>BrightestToggle<CR>
 
-    call neobundle#untap()
-endif
-
-if neobundle#tap('vim-surround')
     call neobundle#untap()
 endif
 
@@ -783,16 +752,6 @@ if neobundle#tap('tagbar')
     nnoremap <Leader>t :<C-u>OpenCloseTagbar<CR>
 
     nnoremap <Leader>s :<C-u>TagbarShowTag<CR>
-
-    call neobundle#untap()
-endif
-
-if neobundle#tap('tabular')
-    call neobundle#config({
-        \   'autoload' : {
-        \       'filetypes' : ['markdown'],
-        \   }
-        \ })
 
     call neobundle#untap()
 endif
